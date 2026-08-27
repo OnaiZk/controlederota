@@ -1,332 +1,128 @@
 [
   {
-    "placa": "ABY-2332",
-    "modelo": "RENAULT MASTER",
+    "placa": "TCT-7A03",
+    "modelo": "FIAT DUCATO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "AXG-4554",
-    "modelo": "RENAULT MASTER",
+    "placa": "TCT-7A01",
+    "modelo": "FIAT DUCATO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "AZA-3668",
-    "modelo": "RENAULT MASTER",
+    "placa": "TCU-7A00",
+    "modelo": "FIAT DUCATO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "BPO-3C47",
-    "modelo": "FORD KA",
+    "placa": "TCT-7A05",
+    "modelo": "FIAT DUCATO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "DLG-9G13",
+    "placa": "STQ-7C91",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "DQB-8468",
-    "modelo": "CAMINHÃO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "EVW-3I44",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "EXM-9579",
-    "modelo": "RENAULT MASTER",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "EXM-9612",
-    "modelo": "RENAULT MASTER",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "FAQ-1E67",
-    "modelo": "FIAT DUCATO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "FAW-8277",
-    "modelo": "RENAULT MASTER",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "FKO-5605",
-    "modelo": "FIAT UNO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "FPE-4B48",
-    "modelo": "YAMAHA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "FPT-0566",
-    "modelo": "RENAULT MASTER",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "FSU-7F15",
+    "placa": "STI-7C40",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "FWI-6J13",
-    "modelo": "KIA CAMINHONETE",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "FXJ-8I82",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "GCH-7A25",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "GDC-7F46",
-    "modelo": "KIA CAMINHONETE",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "GFG-7C08",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "GHO",
-    "modelo": "8907 YAMAHA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "GIB-6616",
-    "modelo": "YAMAHA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "GIP-0469",
-    "modelo": "YAMAHA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "GJP-3H59",
-    "modelo": "YAMAHA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "GKD-9A51",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RFD-3E74",
-    "modelo": "FIAT FIORINO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RFJ-4B57",
-    "modelo": "FIAT FIORINO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RFJ-8C20",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RFK-1D13",
-    "modelo": "FIAT FIORINO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RFK-1E02",
-    "modelo": "FIAT FIORINO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RFK-2B96",
-    "modelo": "FIAT FIORINO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RFK-5B17",
-    "modelo": "FIAT FIORINO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RMG-0F92",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RNF-7I92",
+    "placa": "SST-0B01",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "RNX-7G54",
-    "modelo": "FIAT STRADA",
+    "placa": "STQ-7B80",
+    "modelo": "VW SAVEIRO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "RTD-8F29",
-    "modelo": "FIAT STRADA",
+    "placa": "STX-0A30",
+    "modelo": "VW SAVEIRO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "RTI-0J32",
-    "modelo": "FIAT STRADA",
+    "placa": "STG-6B01",
+    "modelo": "VW SAVEIRO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "RTI-9E20",
-    "modelo": "FIAT STRADA",
+    "placa": "SVB-4H31",
+    "modelo": "VW SAVEIRO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "RTO-2H15",
+    "placa": "SVS-4D10",
+    "modelo": "VW SAVEIRO",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "SVB-7F61",
+    "modelo": "VW SAVEIRO",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "SWN-6E41",
+    "modelo": "VW SAVEIRO",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "STC-5A30",
+    "modelo": "VW SAVEIRO",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "STY-3J63",
+    "modelo": "KIA BONGO",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "SVD-1F58",
+    "modelo": "KIA BONGO",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "SWA-4G96",
     "modelo": "FIAT FIORINO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "RTS-9B75",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RTS-9C05",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RTS-9E82",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RUF-3J33",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RUF-6A73",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RFS-3E22",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RTS-9B64",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RUE-7H25",
-    "modelo": "FIAT STRADA",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RTV-3F65",
+    "placa": "SSY-7C06",
     "modelo": "FIAT FIORINO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "RTB",
-    "modelo": "1A34 FIAT FIORINO",
+    "placa": "STM-8I77",
+    "modelo": "FIAT FIORINO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   },
   {
-    "placa": "RUQ-5G82",
-    "modelo": "FIAR STRADA",
+    "placa": "SVF-0B01",
+    "modelo": "FIAT FIORINO",
     "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RKC-5H80",
-    "modelo": "FIAT DUCATO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RTM-2J97",
-    "modelo": "FIAT DUCATO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "EXO-8C91",
-    "modelo": "FIAT DUCATO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RTO-3A42",
-    "modelo": "FIAT DUCATO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
-  },
-  {
-    "placa": "RLZ-2H20",
-    "modelo": "FIAT DUCATO",
-    "status": "ATIVO",
-    "centroOperacao": "Leste"
+    "centroOperacao": "Matriz"
   }
 ]

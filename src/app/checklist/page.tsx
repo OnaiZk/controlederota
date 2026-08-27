@@ -991,9 +991,8 @@ export default function ChecklistPage() {
                               </FormControl>
                               <SelectContent>
                                 <SelectItem value="Sul">Sul</SelectItem>
-                                <SelectItem value="Norte">Norte</SelectItem>
                                 <SelectItem value="Leste">Leste</SelectItem>
-                                <SelectItem value="Oeste">Oeste</SelectItem>
+                                <SelectItem value="Matriz">Matriz</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />

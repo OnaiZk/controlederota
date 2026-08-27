@@ -119,12 +119,12 @@ export default function DashboardPage() {
   // Form states para Veículo
   const [newPlaca, setNewPlaca] = useState("");
   const [newModelo, setNewModelo] = useState("");
-  const [newCentroOperacao, setNewCentroOperacao] = useState<string>("Leste");
+  const [newCentroOperacao, setNewCentroOperacao] = useState<string>("Matriz");
   const [filialFilter, setFilialFilter] = useState<string>("TODAS");
   const [isCreatingVehicle, setIsCreatingVehicle] = useState(false);
   const [selectedMaintenanceVehicle, setSelectedMaintenanceVehicle] = useState<any>(null);
   const [editingVehicleFilial, setEditingVehicleFilial] = useState<any>(null);
-  const [editFilialValue, setEditFilialValue] = useState<string>("Leste");
+  const [editFilialValue, setEditFilialValue] = useState<string>("Matriz");
   const [isUpdatingFilial, setIsUpdatingFilial] = useState(false);
   const [isBatchAssigning, setIsBatchAssigning] = useState(false);
   const [newProximaManutencao, setNewProximaManutencao] = useState("");
@@ -371,8 +371,7 @@ export default function DashboardPage() {
       TODAS: vehicles?.length || 0,
       Leste: 0,
       Sul: 0,
-      Norte: 0,
-      Oeste: 0,
+      Matriz: 0,
       SEM_FILIAL: 0,
     };
     vehicles?.forEach((v) => {
@@ -903,9 +902,8 @@ export default function DashboardPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Sul">Sul</SelectItem>
-                        <SelectItem value="Norte">Norte</SelectItem>
                         <SelectItem value="Leste">Leste</SelectItem>
-                        <SelectItem value="Oeste">Oeste</SelectItem>
+                        <SelectItem value="Matriz">Matriz</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -975,8 +973,7 @@ export default function DashboardPage() {
                     { id: "TODAS", label: "Todas", count: filialCounts.TODAS },
                     { id: "Leste", label: "Leste", count: filialCounts.Leste },
                     { id: "Sul", label: "Sul", count: filialCounts.Sul },
-                    { id: "Norte", label: "Norte", count: filialCounts.Norte },
-                    { id: "Oeste", label: "Oeste", count: filialCounts.Oeste },
+                    { id: "Matriz", label: "Matriz", count: filialCounts.Matriz },
                     ...(filialCounts.SEM_FILIAL > 0
                       ? [{ id: "SEM_FILIAL", label: "Sem Filial", count: filialCounts.SEM_FILIAL }]
                       : []),
@@ -1043,9 +1040,7 @@ export default function DashboardPage() {
                             filialBadgeColor = "border-amber-500/40 text-amber-700 dark:text-amber-400 bg-amber-500/10";
                           } else if (filialName === "Sul") {
                             filialBadgeColor = "border-blue-500/40 text-blue-700 dark:text-blue-400 bg-blue-500/10";
-                          } else if (filialName === "Norte") {
-                            filialBadgeColor = "border-purple-500/40 text-purple-700 dark:text-purple-400 bg-purple-500/10";
-                          } else if (filialName === "Oeste") {
+                          } else if (filialName === "Matriz") {
                             filialBadgeColor = "border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10";
                           }
 
@@ -1662,9 +1657,8 @@ export default function DashboardPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Sul">Sul</SelectItem>
-                  <SelectItem value="Norte">Norte</SelectItem>
                   <SelectItem value="Leste">Leste</SelectItem>
-                  <SelectItem value="Oeste">Oeste</SelectItem>
+                  <SelectItem value="Matriz">Matriz</SelectItem>
                 </SelectContent>
               </Select>
             </div>
