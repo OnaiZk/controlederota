@@ -13,12 +13,14 @@ export default defineSchema({
   vehicles: defineTable({
     placa: v.string(),
     modelo: v.string(),
+    tag: v.optional(v.string()),
     status: v.union(v.literal("ATIVO"), v.literal("MANUTENCAO")),
     centroOperacao: v.optional(v.string()),
     kmAtual: v.optional(v.number()),
     proximaManutencaoKm: v.optional(v.number()),
   })
     .index("by_placa", ["placa"])
+    .index("by_tag", ["tag"])
     .index("by_centroOperacao", ["centroOperacao"]),
 
   checklists: defineTable({

@@ -106,6 +106,7 @@ export default function DashboardPage() {
 
   // Mutações
   const createVehicle = useMutation(api.vehicles.create);
+  const updateVehicle = useMutation(api.vehicles.updateVehicle);
   const updateVehicleStatus = useMutation(api.vehicles.updateStatus);
   const updateCentroOperacao = useMutation(api.vehicles.updateCentroOperacao);
   const assignBatchCentroOperacao = useMutation(api.vehicles.assignBatchCentroOperacao);
@@ -119,12 +120,14 @@ export default function DashboardPage() {
   // Form states para Veículo
   const [newPlaca, setNewPlaca] = useState("");
   const [newModelo, setNewModelo] = useState("");
+  const [newTag, setNewTag] = useState("");
   const [newCentroOperacao, setNewCentroOperacao] = useState<string>("Matriz");
   const [filialFilter, setFilialFilter] = useState<string>("TODAS");
   const [isCreatingVehicle, setIsCreatingVehicle] = useState(false);
   const [selectedMaintenanceVehicle, setSelectedMaintenanceVehicle] = useState<any>(null);
   const [editingVehicleFilial, setEditingVehicleFilial] = useState<any>(null);
   const [editFilialValue, setEditFilialValue] = useState<string>("Matriz");
+  const [editTagValue, setEditTagValue] = useState("");
   const [isUpdatingFilial, setIsUpdatingFilial] = useState(false);
   const [isBatchAssigning, setIsBatchAssigning] = useState(false);
   const [newProximaManutencao, setNewProximaManutencao] = useState("");
@@ -403,11 +406,13 @@ export default function DashboardPage() {
       await createVehicle({
         placa: newPlaca,
         modelo: newModelo,
+        tag: newTag.trim() || undefined,
         status: "ATIVO",
         centroOperacao: newCentroOperacao,
       });
       setNewPlaca("");
       setNewModelo("");
+      setNewTag("");
       toast({
         title: "Veículo Cadastrado!",
         description: `Veículo inserido com sucesso na Filial ${newCentroOperacao}.`,
@@ -428,20 +433,21 @@ export default function DashboardPage() {
     if (!editingVehicleFilial) return;
     setIsUpdatingFilial(true);
     try {
-      await updateCentroOperacao({
+      await updateVehicle({
         id: editingVehicleFilial._id,
         centroOperacao: editFilialValue,
+        tag: editTagValue.trim() || undefined,
       });
       toast({
-        title: "Filial Atualizada!",
-        description: `Veículo ${editingVehicleFilial.placa} atribuído à Filial ${editFilialValue}.`,
+        title: "Veículo Atualizado!",
+        description: `Dados do veículo ${editingVehicleFilial.placa} salvos com sucesso.`,
       });
       setEditingVehicleFilial(null);
     } catch (error) {
       console.error(error);
       toast({
         title: "Erro ao atualizar",
-        description: "Não foi possível atualizar a filial do veículo.",
+        description: "Não foi possível atualizar os dados do veículo.",
         variant: "destructive",
       });
     } finally {
@@ -895,6 +901,16 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="tag">TAG / Número da Frota (Opcional)</Label>
+                    <Input
+                      id="tag"
+                      placeholder="Ex: 1, 12, 35"
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="centroOperacao">Filial / Centro de Operação</Label>
                     <Select value={newCentroOperacao} onValueChange={(val) => val && setNewCentroOperacao(val)}>
                       <SelectTrigger id="centroOperacao">
@@ -1012,6 +1028,7 @@ export default function DashboardPage() {
                     <TableHeader>
                       <TableRow className="bg-muted/50">
                         <TableHead>Placa</TableHead>
+                        <TableHead>TAG</TableHead>
                         <TableHead>Modelo</TableHead>
                         <TableHead>Filial / Região</TableHead>
                         <TableHead>Status</TableHead>
@@ -1022,7 +1039,7 @@ export default function DashboardPage() {
                     <TableBody>
                       {displayedVehicles.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                          <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                             {filialFilter === "TODAS"
                               ? "Nenhum veículo cadastrado na frota."
                               : `Nenhum veículo cadastrado para o filtro "${filialFilter}".`}
@@ -1052,6 +1069,15 @@ export default function DashboardPage() {
                                   <Badge variant="destructive" className="ml-2 text-[10px]">
                                     MANUTENÇÃO RECOMENDADA
                                   </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {v.tag ? (
+                                  <Badge className="bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/40 font-mono font-bold text-xs">
+                                    TAG {v.tag}
+                                  </Badge>
+                                ) : (
+                                  <span className="text-muted-foreground text-xs font-mono">-</span>
                                 )}
                               </TableCell>
                               <TableCell>{v.modelo}</TableCell>
@@ -1088,12 +1114,13 @@ export default function DashboardPage() {
                                     className="h-8 text-xs font-semibold"
                                     onClick={() => {
                                       setEditingVehicleFilial(v);
-                                      setEditFilialValue(v.centroOperacao || "Leste");
+                                      setEditFilialValue(v.centroOperacao || "Matriz");
+                                      setEditTagValue(v.tag || "");
                                     }}
-                                    title="Alterar filial do veículo"
+                                    title="Alterar filial e TAG do veículo"
                                   >
                                     <MapPinIcon className="w-3.5 h-3.5 mr-1 text-primary" />
-                                    Filial
+                                    Filial / TAG
                                   </Button>
                                   <Button
                                     size="sm"
@@ -1641,14 +1668,23 @@ export default function DashboardPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <MapPinIcon className="w-5 h-5 text-primary" />
-              Alterar Filial do Veículo
+              Editar Veículo / Filial e TAG
             </DialogTitle>
             <DialogDescription>
-              Defina a filial/região do veículo{" "}
+              Defina a filial e o número da TAG do veículo{" "}
               <strong className="font-mono">{editingVehicleFilial?.placa}</strong> ({editingVehicleFilial?.modelo}).
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-tag">TAG / Número da Frota</Label>
+              <Input
+                id="edit-tag"
+                placeholder="Ex: 1, 12, 35"
+                value={editTagValue}
+                onChange={(e) => setEditTagValue(e.target.value)}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="edit-filial">Filial / Centro de Operação</Label>
               <Select value={editFilialValue} onValueChange={(val) => val && setEditFilialValue(val)}>
@@ -1677,7 +1713,7 @@ export default function DashboardPage() {
                 disabled={isUpdatingFilial}
                 onClick={handleUpdateFilial}
               >
-                {isUpdatingFilial ? "Salvando..." : "Salvar Filial"}
+                {isUpdatingFilial ? "Salvando..." : "Salvar Alterações"}
               </Button>
             </div>
           </div>

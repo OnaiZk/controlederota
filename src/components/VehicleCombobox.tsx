@@ -9,6 +9,7 @@ interface Vehicle {
   _id: string;
   placa: string;
   modelo: string;
+  tag?: string;
   status?: string;
   centroOperacao?: string;
 }
@@ -72,7 +73,10 @@ export function VehicleCombobox({
     return vehicles.filter(
       (v) =>
         v.placa.toLowerCase().includes(q) ||
-        v.modelo.toLowerCase().includes(q)
+        v.modelo.toLowerCase().includes(q) ||
+        (v.tag && v.tag.toLowerCase().includes(q)) ||
+        (v.tag && `tag ${v.tag}`.toLowerCase().includes(q)) ||
+        (v.tag && `tag #${v.tag}`.toLowerCase().includes(q))
     );
   }, [search, vehicles]);
 
@@ -118,7 +122,12 @@ export function VehicleCombobox({
           <Car className={cn("w-4 h-4 shrink-0", disabled ? "text-muted-foreground/60" : "text-muted-foreground")} />
           {value ? (
             <div className="flex items-center gap-2 truncate">
-              <Badge variant="outline" className="font-mono font-bold bg-muted/60 px-1.5 py-0 text-xs border-primary/30 text-primary">
+              {selectedVehicle?.tag && (
+                <Badge className="bg-amber-500 hover:bg-amber-500 text-black font-extrabold text-[11px] px-1.5 py-0 shrink-0">
+                  TAG {selectedVehicle.tag}
+                </Badge>
+              )}
+              <Badge variant="outline" className="font-mono font-bold bg-muted/60 px-1.5 py-0 text-xs border-primary/30 text-primary shrink-0">
                 {value}
               </Badge>
               {selectedVehicle && (
@@ -168,7 +177,7 @@ export function VehicleCombobox({
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={filialName ? `Buscar placa da Filial ${filialName}...` : "Digite a placa ou modelo..."}
+                placeholder={filialName ? `Buscar por TAG, placa ou modelo (${filialName})...` : "Buscar por TAG, placa ou modelo..."}
                 className="w-full bg-background border border-input rounded-md pl-8 pr-3 py-1.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground"
                 onKeyDown={(e) => {
                   if (e.key === "Escape") {
@@ -223,6 +232,11 @@ export function VehicleCombobox({
                     )}
                   >
                     <div className="flex items-center gap-2 truncate">
+                      {vehicle.tag && (
+                        <Badge className="bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/40 font-bold text-[11px] px-1.5 py-0 shrink-0">
+                          TAG {vehicle.tag}
+                        </Badge>
+                      )}
                       <span className="font-mono font-bold text-xs bg-background border px-2 py-0.5 rounded shadow-2xs">
                         {vehicle.placa}
                       </span>

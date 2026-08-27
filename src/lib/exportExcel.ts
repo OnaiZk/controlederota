@@ -28,6 +28,7 @@ export interface VehicleExportData {
   _id: string;
   placa: string;
   modelo: string;
+  tag?: string;
   status: string;
   centroOperacao?: string;
   kmAtual?: number;
@@ -338,6 +339,7 @@ export async function exportConsolidatedExcel(
 
   wsVehicles.columns = [
     { key: "placa", width: 16 },
+    { key: "tag", width: 12 },
     { key: "modelo", width: 28 },
     { key: "filial", width: 18 },
     { key: "totalViagens", width: 20 },
@@ -348,7 +350,7 @@ export async function exportConsolidatedExcel(
     { key: "proximaManutencao", width: 24 },
   ];
 
-  wsVehicles.mergeCells("A1:I1");
+  wsVehicles.mergeCells("A1:J1");
   const titleV = wsVehicles.getCell("A1");
   titleV.value = "ELETROMIDIA  |  RESUMO CONSOLIDADO DA FROTA POR VEÍCULO";
   titleV.font = { name: "Arial", size: 14, bold: true, color: { argb: COLOR_WHITE } };
@@ -358,6 +360,7 @@ export async function exportConsolidatedExcel(
 
   const headersV = [
     "PLACA",
+    "TAG",
     "MODELO",
     "FILIAL / REGIÃO",
     "TOTAL DE CHECKLISTS",
@@ -386,6 +389,7 @@ export async function exportConsolidatedExcel(
     string,
     {
       placa: string;
+      tag: string;
       modelo: string;
       filial: string;
       totalChecklists: number;
@@ -401,6 +405,7 @@ export async function exportConsolidatedExcel(
     vehicles.forEach((v) => {
       vehicleStatsMap[v.placa] = {
         placa: v.placa,
+        tag: v.tag || "-",
         modelo: v.modelo,
         filial: v.centroOperacao || "-",
         totalChecklists: 0,
@@ -418,6 +423,7 @@ export async function exportConsolidatedExcel(
     if (!vehicleStatsMap[placa]) {
       vehicleStatsMap[placa] = {
         placa,
+        tag: "-",
         modelo: c.veiculoModelo || "-",
         filial: c.centroOperacao || "-",
         totalChecklists: 0,
@@ -452,6 +458,7 @@ export async function exportConsolidatedExcel(
 
     const rowVals = [
       v.placa,
+      v.tag,
       v.modelo,
       v.filial,
       v.totalChecklists,

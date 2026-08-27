@@ -1,126 +1,147 @@
 [
   {
     "placa": "TCT-7A03",
+    "tag": "1",
     "modelo": "FIAT DUCATO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "TCT-7A01",
+    "tag": "2",
     "modelo": "FIAT DUCATO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "TCU-7A00",
+    "tag": "3",
     "modelo": "FIAT DUCATO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "TCT-7A05",
+    "tag": "4",
     "modelo": "FIAT DUCATO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STQ-7C91",
+    "tag": "12",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STI-7C40",
+    "tag": "13",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SST-0B01",
+    "tag": "14",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STQ-7B80",
+    "tag": "16",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STX-0A30",
+    "tag": "17",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STG-6B01",
+    "tag": "18",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SVB-4H31",
+    "tag": "20",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SVS-4D10",
+    "tag": "21",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SVB-7F61",
+    "tag": "22",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SWN-6E41",
+    "tag": "23",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STC-5A30",
+    "tag": "25",
     "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STY-3J63",
+    "tag": "27",
     "modelo": "KIA BONGO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SVD-1F58",
+    "tag": "28",
     "modelo": "KIA BONGO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SWA-4G96",
+    "tag": "31",
     "modelo": "FIAT FIORINO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SSY-7C06",
+    "tag": "32",
     "modelo": "FIAT FIORINO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STM-8I77",
+    "tag": "33",
     "modelo": "FIAT FIORINO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SVF-0B01",
+    "tag": "35",
     "modelo": "FIAT FIORINO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"

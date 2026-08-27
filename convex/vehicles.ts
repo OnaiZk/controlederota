@@ -23,6 +23,7 @@ export const create = mutation({
   args: {
     placa: v.string(),
     modelo: v.string(),
+    tag: v.optional(v.string()),
     status: v.union(v.literal("ATIVO"), v.literal("MANUTENCAO")),
     centroOperacao: v.optional(v.string()),
     kmAtual: v.optional(v.number()),
@@ -41,6 +42,7 @@ export const create = mutation({
     return await ctx.db.insert("vehicles", {
       placa: args.placa.toUpperCase(),
       modelo: args.modelo,
+      tag: args.tag ? args.tag.trim() : undefined,
       status: args.status,
       centroOperacao: args.centroOperacao,
       kmAtual: args.kmAtual,
@@ -69,11 +71,22 @@ export const updateCentroOperacao = mutation({
   },
 });
 
+export const updateTag = mutation({
+  args: {
+    id: v.id("vehicles"),
+    tag: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, { tag: args.tag ? args.tag.trim() : undefined });
+  },
+});
+
 export const updateVehicle = mutation({
   args: {
     id: v.id("vehicles"),
     placa: v.optional(v.string()),
     modelo: v.optional(v.string()),
+    tag: v.optional(v.string()),
     centroOperacao: v.optional(v.string()),
     status: v.optional(v.union(v.literal("ATIVO"), v.literal("MANUTENCAO"))),
   },
@@ -81,6 +94,7 @@ export const updateVehicle = mutation({
     const patchData: any = {};
     if (args.placa !== undefined) patchData.placa = args.placa.toUpperCase().trim();
     if (args.modelo !== undefined) patchData.modelo = args.modelo.trim();
+    if (args.tag !== undefined) patchData.tag = args.tag ? args.tag.trim() : undefined;
     if (args.centroOperacao !== undefined) patchData.centroOperacao = args.centroOperacao;
     if (args.status !== undefined) patchData.status = args.status;
     await ctx.db.patch(args.id, patchData);
@@ -107,6 +121,7 @@ export const insertMany = mutation({
       v.object({
         placa: v.string(),
         modelo: v.string(),
+        tag: v.optional(v.string()),
         status: v.union(v.literal("ATIVO"), v.literal("MANUTENCAO")),
         centroOperacao: v.optional(v.string()),
       })
@@ -125,6 +140,7 @@ export const insertMany = mutation({
         await ctx.db.insert("vehicles", {
           placa: placaClean,
           modelo: vehicle.modelo,
+          tag: vehicle.tag ? vehicle.tag.trim() : undefined,
           status: vehicle.status,
           centroOperacao: vehicle.centroOperacao,
         });
