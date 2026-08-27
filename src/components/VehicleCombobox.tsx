@@ -118,10 +118,10 @@ export function VehicleCombobox({
           isOpen && !disabled && "ring-2 ring-primary border-primary"
         )}
       >
-        <div className="flex items-center gap-2 overflow-hidden">
+        <div className="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
           <Car className={cn("w-4 h-4 shrink-0", disabled ? "text-muted-foreground/60" : "text-muted-foreground")} />
           {value ? (
-            <div className="flex items-center gap-2 truncate">
+            <div className="flex items-center gap-2 truncate min-w-0 flex-1">
               {selectedVehicle?.tag && (
                 <Badge className="bg-amber-500 hover:bg-amber-500 text-black font-extrabold text-[11px] px-1.5 py-0 shrink-0">
                   TAG {selectedVehicle.tag}

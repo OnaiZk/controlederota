@@ -1005,10 +1005,10 @@ export default function ChecklistPage() {
                         name="veiculoId"
                         render={({ field, fieldState }) => (
                           <FormItem>
-                            <div className="flex items-center justify-between">
-                              <FormLabel>Veículo (Placa)</FormLabel>
+                            <div className="flex items-center justify-between gap-2">
+                              <FormLabel className="truncate">Veículo (Placa)</FormLabel>
                               {selectedCentroOperacao && (
-                                <span className="text-[11px] text-muted-foreground font-medium">
+                                <span className="text-[11px] text-muted-foreground font-medium shrink-0">
                                   Filial {selectedCentroOperacao}: {availableVehicles.length} carro(s)
                                 </span>
                               )}
@@ -1057,9 +1057,9 @@ export default function ChecklistPage() {
                         name="kmFinal"
                         render={({ field }) => (
                           <FormItem>
-                            <div className="flex items-center justify-between">
-                              <FormLabel>KM Final (Opcional no início)</FormLabel>
-                              <span className="text-[11px] text-muted-foreground italic">Pode preencher ao final</span>
+                            <div className="flex items-center justify-between gap-2">
+                              <FormLabel className="truncate">KM Final (Opcional no início)</FormLabel>
+                              <span className="text-[11px] text-muted-foreground italic shrink-0">Pode preencher ao final</span>
                             </div>
                             <FormControl>
                               <Input
