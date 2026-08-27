@@ -9,7 +9,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardListIcon, LayoutDashboardIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ClipboardListIcon, LayoutDashboardIcon, Download } from "lucide-react";
+import { usePWA } from "@/components/PWAInstallPrompt";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -32,6 +34,8 @@ export function Navbar() {
       }).catch(console.error);
     }
   }, [isLoaded, user, syncUser]);
+
+  const { isInstalled, installApp } = usePWA();
 
   const isLeader = currentUser?.role === "LIDER";
 
@@ -97,8 +101,21 @@ export function Navbar() {
           </nav>
         )}
 
-        {/* User Profile & Role */}
-        <div className="flex items-center gap-3">
+        {/* User Profile, Role & Install Button */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {!isInstalled && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={installApp}
+              className="flex items-center gap-1.5 text-xs font-semibold text-[#FF4F00] border-[#FF4F00]/30 hover:bg-[#FF4F00]/10 hover:text-[#FF4F00] rounded-xl h-8 px-2.5 transition-all"
+              title="Instalar como aplicativo no dispositivo"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Instalar App</span>
+            </Button>
+          )}
+
           {user && (
             <div className="hidden md:flex flex-col text-right">
               <span className="text-xs font-bold leading-tight truncate max-w-[160px]">

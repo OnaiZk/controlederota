@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import { Download } from "lucide-react";
+import { usePWA } from "@/components/PWAInstallPrompt";
 
 export default function Home() {
   const { isLoaded, userId } = useAuth();
+  const { isInstalled, installApp } = usePWA();
 
   if (isLoaded && userId) {
     redirect("/checklist");
@@ -61,6 +64,20 @@ export default function Home() {
               Primeiro Acesso? Criar Cadastro
             </Button>
           </SignUpButton>
+
+          {!isInstalled && (
+            <div className="pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={installApp}
+                className="w-full text-xs text-muted-foreground hover:text-primary flex items-center justify-center gap-2 h-10 rounded-xl transition-all"
+              >
+                <Download className="w-4 h-4 text-[#FF4F00]" />
+                Instalar como aplicativo no seu aparelho
+              </Button>
+            </div>
+          )}
         </div>
       </motion.div>
     </div>
