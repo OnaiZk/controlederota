@@ -1,0 +1,332 @@
+[
+  {
+    "placa": "ABY-2332",
+    "modelo": "RENAULT MASTER",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "AXG-4554",
+    "modelo": "RENAULT MASTER",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "AZA-3668",
+    "modelo": "RENAULT MASTER",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "BPO-3C47",
+    "modelo": "FORD KA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "DLG-9G13",
+    "modelo": "VW SAVEIRO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "DQB-8468",
+    "modelo": "CAMINHÃO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "EVW-3I44",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "EXM-9579",
+    "modelo": "RENAULT MASTER",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "EXM-9612",
+    "modelo": "RENAULT MASTER",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "FAQ-1E67",
+    "modelo": "FIAT DUCATO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "FAW-8277",
+    "modelo": "RENAULT MASTER",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "FKO-5605",
+    "modelo": "FIAT UNO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "FPE-4B48",
+    "modelo": "YAMAHA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "FPT-0566",
+    "modelo": "RENAULT MASTER",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "FSU-7F15",
+    "modelo": "VW SAVEIRO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "FWI-6J13",
+    "modelo": "KIA CAMINHONETE",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "FXJ-8I82",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "GCH-7A25",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "GDC-7F46",
+    "modelo": "KIA CAMINHONETE",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "GFG-7C08",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "GHO",
+    "modelo": "8907 YAMAHA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "GIB-6616",
+    "modelo": "YAMAHA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "GIP-0469",
+    "modelo": "YAMAHA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "GJP-3H59",
+    "modelo": "YAMAHA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "GKD-9A51",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RFD-3E74",
+    "modelo": "FIAT FIORINO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RFJ-4B57",
+    "modelo": "FIAT FIORINO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RFJ-8C20",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RFK-1D13",
+    "modelo": "FIAT FIORINO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RFK-1E02",
+    "modelo": "FIAT FIORINO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RFK-2B96",
+    "modelo": "FIAT FIORINO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RFK-5B17",
+    "modelo": "FIAT FIORINO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RMG-0F92",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RNF-7I92",
+    "modelo": "VW SAVEIRO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RNX-7G54",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RTD-8F29",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RTI-0J32",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RTI-9E20",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RTO-2H15",
+    "modelo": "FIAT FIORINO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RTS-9B75",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RTS-9C05",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RTS-9E82",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RUF-3J33",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RUF-6A73",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RFS-3E22",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RTS-9B64",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RUE-7H25",
+    "modelo": "FIAT STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RTV-3F65",
+    "modelo": "FIAT FIORINO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RTB",
+    "modelo": "1A34 FIAT FIORINO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RUQ-5G82",
+    "modelo": "FIAR STRADA",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RKC-5H80",
+    "modelo": "FIAT DUCATO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RTM-2J97",
+    "modelo": "FIAT DUCATO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "EXO-8C91",
+    "modelo": "FIAT DUCATO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RTO-3A42",
+    "modelo": "FIAT DUCATO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  },
+  {
+    "placa": "RLZ-2H20",
+    "modelo": "FIAT DUCATO",
+    "status": "ATIVO",
+    "centroOperacao": "Leste"
+  }
+]
