@@ -1,148 +1,302 @@
 [
   {
     "placa": "TCT-7A03",
-    "tag": "1",
     "modelo": "FIAT DUCATO",
+    "tag": "01",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "TZH-6H53",
+    "modelo": "HYUNDAI HB20S",
+    "tag": "01",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "TCT-7A01",
-    "tag": "2",
     "modelo": "FIAT DUCATO",
+    "tag": "02",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "TZH-6H85",
+    "modelo": "HYUNDAI HB20S",
+    "tag": "02",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "TCU-7A00",
-    "tag": "3",
     "modelo": "FIAT DUCATO",
+    "tag": "03",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "TEU-8C05",
+    "modelo": "FIAT CRONOS",
+    "tag": "03",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "TCT-7A05",
-    "tag": "4",
     "modelo": "FIAT DUCATO",
+    "tag": "04",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "TZH-6H49",
+    "modelo": "HYUNDAI HB20S",
+    "tag": "04",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "TZH-6H66",
+    "modelo": "HYUNDAI HB20S",
+    "tag": "05",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "TDT-3A73",
+    "modelo": "FIAT ARGO",
+    "tag": "06",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "SUQ-2H40",
+    "modelo": "VOLKS SAVEIRO",
+    "tag": "07",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "GEQ-6B31",
+    "modelo": "VOLKS SAVEIRO",
+    "tag": "08",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "TDT-5I59",
+    "modelo": "FIAT ARGO",
+    "tag": "09",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "TDT-3E02",
+    "modelo": "FIAT ARGO",
+    "tag": "10",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "SWG-3H71",
+    "modelo": "VOLKS SAVEIRO",
+    "tag": "11",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "URC-0J51",
+    "modelo": "HYUNDAI HB20S",
+    "tag": "11",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STQ-7C91",
+    "modelo": "VOLKS SAVEIRO",
     "tag": "12",
-    "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STI-7C40",
+    "modelo": "VOLKS SAVEIRO",
     "tag": "13",
-    "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SST-0B01",
+    "modelo": "VOLKS SAVEIRO",
     "tag": "14",
-    "modelo": "VW SAVEIRO",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "SUX-5F00",
+    "modelo": "VOLKS SAVEIRO",
+    "tag": "15",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STQ-7B80",
+    "modelo": "VOLKS SAVEIRO",
     "tag": "16",
-    "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STX-0A30",
+    "modelo": "VOLKS SAVEIRO",
     "tag": "17",
-    "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STG-6B01",
+    "modelo": "VOLKS SAVEIRO",
     "tag": "18",
-    "modelo": "VW SAVEIRO",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "SWE-7G61",
+    "modelo": "VOLKS SAVEIRO",
+    "tag": "19",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SVB-4H31",
+    "modelo": "VOLKS SAVEIRO",
     "tag": "20",
-    "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SVS-4D10",
+    "modelo": "VOLKS SAVEIRO",
     "tag": "21",
-    "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SVB-7F61",
+    "modelo": "VOLKS SAVEIRO",
     "tag": "22",
-    "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SWN-6E41",
+    "modelo": "VOLKS SAVEIRO",
     "tag": "23",
-    "modelo": "VW SAVEIRO",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "TDT-3A63",
+    "modelo": "FIAT ARGO",
+    "tag": "24",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STC-5A30",
+    "modelo": "VOLKS SAVEIRO",
     "tag": "25",
-    "modelo": "VW SAVEIRO",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STY-3J63",
-    "tag": "27",
     "modelo": "KIA BONGO",
+    "tag": "27",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SVD-1F58",
-    "tag": "28",
     "modelo": "KIA BONGO",
+    "tag": "28",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "UFJ-4H50",
+    "modelo": "FIAT FIORINO",
+    "tag": "30",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SWA-4G96",
-    "tag": "31",
     "modelo": "FIAT FIORINO",
+    "tag": "31",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "SSY-7C06",
-    "tag": "32",
     "modelo": "FIAT FIORINO",
+    "tag": "32",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
     "placa": "STM-8I77",
-    "tag": "33",
     "modelo": "FIAT FIORINO",
+    "tag": "33",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   },
   {
-    "placa": "SVF-0B01",
-    "tag": "35",
+    "placa": "UPC-6D73",
     "modelo": "FIAT FIORINO",
+    "tag": "34",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "GHO-8907",
+    "modelo": "YAMAHA",
+    "tag": "42",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "FPE-4B48",
+    "modelo": "YAMAHA",
+    "tag": "43",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "GIB-6616",
+    "modelo": "YAMAHA",
+    "tag": "44",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "GJP-3H59",
+    "modelo": "YAMAHA",
+    "tag": "45",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "GIP-0469",
+    "modelo": "YAMAHA",
+    "tag": "46",
+    "status": "ATIVO",
+    "centroOperacao": "Matriz"
+  },
+  {
+    "placa": "STG-3H90",
+    "modelo": "VOLKS SAVEIRO",
+    "tag": "87",
     "status": "ATIVO",
     "centroOperacao": "Matriz"
   }
