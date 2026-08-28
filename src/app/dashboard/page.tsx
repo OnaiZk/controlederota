@@ -72,6 +72,8 @@ import {
   ShieldAlertIcon,
   LockIcon,
   ArrowLeftIcon,
+  SmartphoneIcon,
+  PrinterIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { exportConsolidatedExcel } from "@/lib/exportExcel";
@@ -211,6 +213,442 @@ export default function DashboardPage() {
     }
   };
 
+  // Função para imprimir checklist completo
+  const handlePrintChecklist = () => {
+    if (!checklistDetail) return;
+
+    const items = [
+      { label: "Estepe", val: checklistDetail.estepe },
+      { label: "Triângulo", val: checklistDetail.triangulo },
+      { label: "Chave de Roda", val: checklistDetail.chaveRoda },
+      { label: "Faróis/Lanternas", val: checklistDetail.faroisLanternas },
+      { label: "Macaco", val: checklistDetail.macaco },
+      { label: "Buzina", val: checklistDetail.buzina },
+      { label: "Documentação", val: checklistDetail.documentacao },
+      { label: "Cartão Abastecimento", val: checklistDetail.cartaoAbastecimento },
+    ];
+
+    const formatItemVal = (val: unknown) => {
+      if (typeof val === "boolean") return val ? "Sim" : "Não";
+      return (val as string) || "Não informado";
+    };
+
+    const isPositive = (val: unknown) =>
+      val === true || val === "Sim" || val === "Bom";
+
+    const kmRodados =
+      checklistDetail.kmFinal !== undefined &&
+      checklistDetail.kmFinal !== null &&
+      checklistDetail.kmFinal >= checklistDetail.kmInicial
+        ? `+${(checklistDetail.kmFinal - checklistDetail.kmInicial).toLocaleString()} km`
+        : "Em rota";
+
+    const fotosSaida = [
+      { label: "Frente (Saída)", url: checklistDetail.photoUrls?.frente },
+      { label: "Lado Esquerdo (Saída)", url: checklistDetail.photoUrls?.ladoEsquerdo },
+      { label: "Lado Direito (Saída)", url: checklistDetail.photoUrls?.ladoDireito },
+      { label: "Traseira (Saída)", url: checklistDetail.photoUrls?.tras },
+      { label: "Parte Interna (Saída)", url: checklistDetail.photoUrls?.interna },
+      { label: "Carroceria (Saída)", url: checklistDetail.photoUrls?.carroceria },
+    ];
+
+    const fotosRetorno = [
+      { label: "Frente (Retorno)", url: checklistDetail.photoFimUrls?.frente },
+      { label: "Lado Esquerdo (Retorno)", url: checklistDetail.photoFimUrls?.ladoEsquerdo },
+      { label: "Lado Direito (Retorno)", url: checklistDetail.photoFimUrls?.ladoDireito },
+      { label: "Traseira (Retorno)", url: checklistDetail.photoFimUrls?.tras },
+      { label: "Parte Interna (Retorno)", url: checklistDetail.photoFimUrls?.interna },
+      { label: "Carroceria (Retorno)", url: checklistDetail.photoFimUrls?.carroceria },
+    ];
+
+    const printWindow = window.open("", "_blank", "width=900,height=700");
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <title>Checklist - ${checklistDetail.veiculoPlaca} - ${checklistDetail.data}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            color: #1a1a1a;
+            padding: 20px;
+            line-height: 1.4;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 3px solid #f59e0b;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+          }
+          .header-left h1 {
+            font-size: 20px;
+            font-weight: 800;
+            color: #111;
+          }
+          .header-left .subtitle {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
+          }
+          .header-right {
+            text-align: right;
+            font-size: 11px;
+            color: #555;
+          }
+          .header-right .placa {
+            font-size: 18px;
+            font-weight: 800;
+            color: #111;
+            background: #f59e0b;
+            padding: 4px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 4px;
+            font-family: monospace;
+          }
+          .info-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+          }
+          .info-item {
+            flex: 1;
+            min-width: 140px;
+          }
+          .info-item .label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #888;
+            letter-spacing: 0.5px;
+          }
+          .info-item .value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #111;
+          }
+          .section {
+            margin-bottom: 16px;
+          }
+          .section-title {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #555;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 4px;
+            margin-bottom: 8px;
+          }
+          .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+          }
+          .level-card {
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+          }
+          .level-card .label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #888;
+          }
+          .level-card .value {
+            font-size: 15px;
+            font-weight: 700;
+            font-family: monospace;
+            color: #111;
+          }
+          .level-card.highlight {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+          }
+          .level-card.highlight .value {
+            color: #047857;
+          }
+          .items-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+          }
+          .item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 10px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            background: #fafafa;
+          }
+          .item-row .name {
+            font-weight: 600;
+            font-size: 12px;
+          }
+          .item-row .status {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+          }
+          .item-row .status.ok {
+            background: #dcfce7;
+            color: #166534;
+          }
+          .item-row .status.nok {
+            background: #fee2e2;
+            color: #991b1b;
+          }
+          .obs-box {
+            padding: 10px;
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 6px;
+            margin-bottom: 16px;
+          }
+          .obs-box .obs-title {
+            font-weight: 700;
+            font-size: 11px;
+            color: #92400e;
+            margin-bottom: 4px;
+          }
+          .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+          }
+          .photo-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            break-inside: avoid;
+          }
+          .photo-card .photo-label {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 8px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+            text-transform: uppercase;
+          }
+          .photo-card img {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            display: block;
+          }
+          .photo-card .no-photo {
+            width: 100%;
+            height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            font-size: 11px;
+            font-style: italic;
+            background: #f9f9f9;
+          }
+          .footer {
+            margin-top: 24px;
+            padding-top: 12px;
+            border-top: 2px solid #e5e5e5;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+          }
+          .footer .print-info {
+            font-size: 10px;
+            color: #999;
+          }
+          .footer .signature {
+            text-align: center;
+            min-width: 200px;
+          }
+          .footer .signature .line {
+            border-top: 1px solid #333;
+            margin-bottom: 4px;
+          }
+          .footer .signature .sig-label {
+            font-size: 10px;
+            color: #666;
+          }
+          @media print {
+            body { padding: 10px; }
+            .photos-grid { break-inside: avoid; }
+            .section { break-inside: avoid; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="header-left">
+            <h1>📋 Checklist de Veículo</h1>
+            <div class="subtitle">Eletromidia — Controle de Frota</div>
+          </div>
+          <div class="header-right">
+            <div class="placa">${checklistDetail.veiculoPlaca}</div>
+            <div>Status: <strong>${checklistDetail.status === "FINALIZADO" ? "✅ TURNO FINALIZADO" : "🔄 EM ROTA"}</strong></div>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-item">
+            <div class="label">Técnico Responsável</div>
+            <div class="value">${checklistDetail.tecnicoNome}</div>
+          </div>
+          <div class="info-item">
+            <div class="label">OPEC</div>
+            <div class="value">${checklistDetail.opec || "Não informado"}</div>
+          </div>
+          <div class="info-item">
+            <div class="label">Data</div>
+            <div class="value">${checklistDetail.data}</div>
+          </div>
+          <div class="info-item">
+            <div class="label">Saída</div>
+            <div class="value">${checklistDetail.hora}</div>
+          </div>
+          ${checklistDetail.horaFinal ? `
+          <div class="info-item">
+            <div class="label">Retorno</div>
+            <div class="value">${checklistDetail.horaFinal}</div>
+          </div>` : ""}
+          <div class="info-item">
+            <div class="label">Centro de Operação</div>
+            <div class="value">${checklistDetail.centroOperacao}</div>
+          </div>
+        </div>
+
+        ${checklistDetail.observacoesFim ? `
+        <div class="obs-box">
+          <div class="obs-title">📝 Observações do Encerramento:</div>
+          <div>${checklistDetail.observacoesFim}</div>
+        </div>` : ""}
+
+        <div class="section">
+          <div class="section-title">📊 Níveis e Quilometragem</div>
+          <div class="levels-grid">
+            <div class="level-card">
+              <div class="label">KM Inicial (Saída)</div>
+              <div class="value">${checklistDetail.kmInicial?.toLocaleString()} km</div>
+            </div>
+            <div class="level-card">
+              <div class="label">KM Final (Retorno)</div>
+              <div class="value">${checklistDetail.kmFinal !== undefined && checklistDetail.kmFinal !== null ? `${checklistDetail.kmFinal.toLocaleString()} km` : "Aguardando..."}</div>
+            </div>
+            <div class="level-card highlight">
+              <div class="label">KM Rodados</div>
+              <div class="value">${kmRodados}</div>
+            </div>
+            <div class="level-card">
+              <div class="label">Combustível</div>
+              <div class="value">${checklistDetail.nivelCombustivel}</div>
+            </div>
+            <div class="level-card">
+              <div class="label">Óleo do Motor</div>
+              <div class="value">${checklistDetail.nivelOleo}</div>
+            </div>
+            <div class="level-card">
+              <div class="label">Água do Motor</div>
+              <div class="value">${checklistDetail.nivelAgua}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">✅ Itens e Acessórios Verificados</div>
+          <div class="items-grid">
+            ${items.map((item) => `
+              <div class="item-row">
+                <span class="name">${item.label}</span>
+                <span class="status ${isPositive(item.val) ? "ok" : "nok"}">${formatItemVal(item.val)}</span>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">📷 1. Registro Fotográfico de Saída</div>
+          <div class="photos-grid">
+            ${fotosSaida.map((foto) => `
+              <div class="photo-card">
+                <div class="photo-label">${foto.label}</div>
+                ${foto.url ? `<img src="${foto.url}" alt="${foto.label}" />` : `<div class="no-photo">Sem foto</div>`}
+              </div>
+            `).join("")}
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">📷 2. Registro Fotográfico de Retorno</div>
+          <div class="photos-grid">
+            ${fotosRetorno.map((foto) => `
+              <div class="photo-card">
+                <div class="photo-label">${foto.label}</div>
+                ${foto.url ? `<img src="${foto.url}" alt="${foto.label}" />` : `<div class="no-photo">Sem foto / Em rota</div>`}
+              </div>
+            `).join("")}
+          </div>
+        </div>
+
+        <div class="footer">
+          <div class="print-info">
+            Documento gerado em ${new Date().toLocaleString("pt-BR")}<br/>
+            Veículo: ${checklistDetail.veiculoPlaca} • Checklist: ${checklistDetail.data}
+          </div>
+          <div class="signature">
+            <div class="line"></div>
+            <div class="sig-label">Assinatura / Responsável</div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+
+    // Aguardar imagens carregarem antes de imprimir
+    const images = printWindow.document.querySelectorAll("img");
+    let loadedCount = 0;
+    const totalImages = images.length;
+
+    if (totalImages === 0) {
+      setTimeout(() => printWindow.print(), 300);
+    } else {
+      images.forEach((img) => {
+        img.onload = () => {
+          loadedCount++;
+          if (loadedCount >= totalImages) {
+            setTimeout(() => printWindow.print(), 300);
+          }
+        };
+        img.onerror = () => {
+          loadedCount++;
+          if (loadedCount >= totalImages) {
+            setTimeout(() => printWindow.print(), 300);
+          }
+        };
+      });
+      // Fallback: imprimir após 5 segundos mesmo se imagens não carregarem
+      setTimeout(() => printWindow.print(), 5000);
+    }
+  };
+
   // States para Exclusão de Usuário
   const [userToDelete, setUserToDelete] = useState<any>(null);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
@@ -297,6 +735,7 @@ export default function DashboardPage() {
       "Centro Operacao",
       "Tecnico",
       "Email",
+      "OPEC (Celular)",
       "Placa",
       "Modelo",
       "KM Inicial",
@@ -315,7 +754,7 @@ export default function DashboardPage() {
       "Cartao Abastecimento",
     ];
 
-    const rows = dataToExport.map((c) => {
+    const rows = dataToExport.map((c: any) => {
       const kmDiff =
         c.kmFinal !== undefined && c.kmFinal !== null && c.kmFinal >= c.kmInicial
           ? c.kmFinal - c.kmInicial
@@ -327,6 +766,7 @@ export default function DashboardPage() {
         c.centroOperacao,
         `"${c.tecnicoNome}"`,
         c.tecnicoEmail,
+        `"${c.opec || "-"}"`,
         c.veiculoPlaca,
         `"${c.veiculoModelo}"`,
         c.kmInicial,
@@ -738,6 +1178,7 @@ export default function DashboardPage() {
                       <TableHead>Hora</TableHead>
                       <TableHead>Técnico</TableHead>
                       <TableHead>Veículo</TableHead>
+                      <TableHead>Aparelho (OPEC)</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Região</TableHead>
                       <TableHead>KM / Rodados</TableHead>
@@ -749,18 +1190,18 @@ export default function DashboardPage() {
                   <TableBody>
                     {!checklists ? (
                       <TableRow>
-                        <TableCell colSpan={9} className="h-24 text-center">
+                        <TableCell colSpan={10} className="h-24 text-center">
                           Carregando relatórios...
                         </TableCell>
                       </TableRow>
                     ) : checklists.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
+                        <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
                           Nenhum checklist registrado para esta data.
                         </TableCell>
                       </TableRow>
                     ) : (
-                      checklists.map((c) => {
+                      checklists.map((c: any) => {
                         const isFinished = c.status === "FINALIZADO" || (c.kmFinal !== undefined && c.kmFinal !== null && c.kmFinal > 0);
                         const kmRodados =
                           isFinished && c.kmFinal !== undefined && c.kmFinal !== null && c.kmFinal >= c.kmInicial
@@ -783,6 +1224,16 @@ export default function DashboardPage() {
                               <Badge variant="outline" className="font-mono font-bold bg-muted/20">
                                 {c.veiculoPlaca}
                               </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {c.opec ? (
+                                <Badge variant="outline" className="text-xs font-semibold flex items-center gap-1 w-fit bg-primary/10 border-primary/30 text-foreground">
+                                  <SmartphoneIcon className="w-3 h-3 text-primary shrink-0" />
+                                  {c.opec}
+                                </Badge>
+                              ) : (
+                                <span className="text-xs text-muted-foreground italic">Não inf.</span>
+                              )}
                             </TableCell>
                             <TableCell>
                               {isFinished ? (
@@ -1278,6 +1729,12 @@ export default function DashboardPage() {
                     {checklistDetail.veiculoPlaca}
                   </Badge>
                 )}
+                {checklistDetail?.opec && (
+                  <Badge className="bg-primary/20 text-foreground border border-primary/40 text-xs font-bold flex items-center gap-1">
+                    <SmartphoneIcon className="w-3.5 h-3.5 text-primary" />
+                    {checklistDetail.opec}
+                  </Badge>
+                )}
                 {checklistDetail && (
                   <Badge
                     className={`text-xs font-bold ${
@@ -1296,6 +1753,10 @@ export default function DashboardPage() {
                 <span className="flex items-center gap-1">
                   <UserIcon className="w-3.5 h-3.5 text-primary" />
                   <strong className="text-foreground">{checklistDetail.tecnicoNome}</strong>
+                </span>
+                <span className="flex items-center gap-1">
+                  <SmartphoneIcon className="w-3.5 h-3.5 text-primary" />
+                  OPEC: <strong className="text-foreground">{checklistDetail.opec || "Não informado"}</strong>
                 </span>
                 <span className="flex items-center gap-1">
                   <CalendarIcon className="w-3.5 h-3.5" />
@@ -1582,15 +2043,26 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground">
                   Checklist registrado no sistema • <span className="font-mono">{checklistDetail.veiculoPlaca}</span>
                 </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200 dark:border-red-900/40 w-full sm:w-auto"
-                  onClick={() => setChecklistToDelete(checklistDetail)}
-                >
-                  <Trash2Icon className="w-4 h-4 mr-1" />
-                  Excluir este Checklist
-                </Button>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 sm:flex-initial flex items-center gap-1"
+                    onClick={handlePrintChecklist}
+                  >
+                    <PrinterIcon className="w-4 h-4 mr-1" />
+                    Imprimir Checklist
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200 dark:border-red-900/40 flex-1 sm:flex-initial"
+                    onClick={() => setChecklistToDelete(checklistDetail)}
+                  >
+                    <Trash2Icon className="w-4 h-4 mr-1" />
+                    Excluir este Checklist
+                  </Button>
+                </div>
               </div>
             </div>
           )}

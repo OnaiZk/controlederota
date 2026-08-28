@@ -32,6 +32,9 @@ export default defineSchema({
     kmInicial: v.number(),
     kmFinal: v.optional(v.number()),
     
+    // Identificação da Operação
+    opec: v.optional(v.string()), // Celular corporativo (OPEC) utilizado
+
     // Horários e Status
     horaFinal: v.optional(v.string()),
     status: v.optional(v.union(v.literal("EM_ANDAMENTO"), v.literal("FINALIZADO"))),
@@ -57,6 +60,10 @@ export default defineSchema({
     fotoTras: v.optional(v.id("_storage")),
     fotoInterna: v.optional(v.id("_storage")),
     fotoCarroceria: v.optional(v.id("_storage")),
+
+    // Assinatura do Técnico
+    assinaturaTecnico: v.optional(v.string()), // base64 data URL da assinatura na saída
+    assinaturaFimTecnico: v.optional(v.string()), // base64 data URL da assinatura no encerramento
 
     // Fotos de Retorno (Pós-Atividades / Encerramento)
     fotoFimFrente: v.optional(v.id("_storage")),

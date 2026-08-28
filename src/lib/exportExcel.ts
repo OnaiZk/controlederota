@@ -7,6 +7,7 @@ export interface ChecklistExportData {
   centroOperacao: string;
   tecnicoNome: string;
   tecnicoEmail: string;
+  opec?: string;
   veiculoPlaca: string;
   veiculoModelo: string;
   kmInicial: number;
@@ -81,6 +82,7 @@ export async function exportConsolidatedExcel(
     { key: "centroOperacao", width: 22 },
     { key: "tecnicoNome", width: 26 },
     { key: "tecnicoEmail", width: 32 },
+    { key: "opec", width: 16 },
     { key: "veiculoPlaca", width: 15 },
     { key: "veiculoModelo", width: 24 },
     { key: "kmInicial", width: 14 },
@@ -100,7 +102,7 @@ export async function exportConsolidatedExcel(
   ];
 
   // 1. Banner Principal (Linhas 1 e 2)
-  wsMain.mergeCells("A1:U1");
+  wsMain.mergeCells("A1:V1");
   const titleCell = wsMain.getCell("A1");
   titleCell.value = "ELETROMIDIA  |  SISTEMA DE CONTROLE DE FROTA";
   titleCell.font = { name: "Arial", size: 16, bold: true, color: { argb: COLOR_WHITE } };
@@ -108,7 +110,7 @@ export async function exportConsolidatedExcel(
   titleCell.alignment = { horizontal: "center", vertical: "middle" };
   wsMain.getRow(1).height = 36;
 
-  wsMain.mergeCells("A2:U2");
+  wsMain.mergeCells("A2:V2");
   const subtitleCell = wsMain.getCell("A2");
   const isFiltered = !!options?.filterDate;
   subtitleCell.value = isFiltered
@@ -136,7 +138,7 @@ export async function exportConsolidatedExcel(
     minute: "2-digit",
   });
 
-  wsMain.mergeCells("A3:U3");
+  wsMain.mergeCells("A3:V3");
   const kpiCell = wsMain.getCell("A3");
   kpiCell.value = `Emissão: ${dataHojeStr}  |  Total de Checklists: ${sortedChecklists.length}  |  Veículos Atendidos: ${totalVeiculosUnicos}  |  Técnicos: ${totalTecnicosUnicos}  |  Total KM Rodados: ${totalKmCalculado.toLocaleString("pt-BR")} km`;
   kpiCell.font = { name: "Arial", size: 10, italic: true, bold: true, color: { argb: COLOR_DARK } };
@@ -154,6 +156,7 @@ export async function exportConsolidatedExcel(
     "CENTRO OPERAÇÃO",
     "TÉCNICO",
     "E-MAIL",
+    "OPEC (CELULAR)",
     "PLACA",
     "MODELO",
     "KM INICIAL",
@@ -223,6 +226,7 @@ export async function exportConsolidatedExcel(
       c.centroOperacao || "-",
       c.tecnicoNome || "-",
       c.tecnicoEmail || "-",
+      c.opec || "-",
       (c.veiculoPlaca || "").toUpperCase(),
       c.veiculoModelo || "-",
       c.kmInicial || 0,
@@ -257,24 +261,24 @@ export async function exportConsolidatedExcel(
 
       const colNum = colIdx + 1;
 
-      if (colNum === 1 || colNum === 2 || colNum === 6) {
+      if (colNum === 1 || colNum === 2 || colNum === 6 || colNum === 7) {
         cell.alignment = { horizontal: "center", vertical: "middle" };
-        if (colNum === 6) {
+        if (colNum === 7) {
           cell.font = { name: "Arial", size: 10, bold: true, color: { argb: COLOR_DARK } };
         }
       } else if (colNum === 3) {
         cell.alignment = { horizontal: "center", vertical: "middle" };
-      } else if (colNum === 4 || colNum === 5 || colNum === 7) {
+      } else if (colNum === 4 || colNum === 5 || colNum === 8) {
         cell.alignment = { horizontal: "left", vertical: "middle" };
-      } else if (colNum === 8 || colNum === 9 || colNum === 10) {
+      } else if (colNum === 9 || colNum === 10 || colNum === 11) {
         cell.alignment = { horizontal: "right", vertical: "middle" };
         if (typeof val === "number") {
           cell.numFmt = '#,##0 "km"';
-          if (colNum === 10) {
+          if (colNum === 11) {
             cell.font = { name: "Arial", size: 10, bold: true, color: { argb: COLOR_GREEN_TEXT } };
           }
         }
-      } else if (colNum === 11) {
+      } else if (colNum === 12) {
         cell.alignment = { horizontal: "center", vertical: "middle" };
         cell.numFmt = "@"; // Garante formato Texto para '3/4' não virar '03/abr'
       } else {
@@ -304,7 +308,7 @@ export async function exportConsolidatedExcel(
   totalRow.getCell(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_DARK } };
   totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
 
-  for (let c = 2; c <= 21; c++) {
+  for (let c = 2; c <= 22; c++) {
     const cell = totalRow.getCell(c);
     cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_DARK } };
     cell.font = { name: "Arial", size: 10, bold: true, color: { argb: COLOR_WHITE } };
@@ -317,9 +321,9 @@ export async function exportConsolidatedExcel(
   totalRow.getCell(3).value = `${sortedChecklists.length} checklists`;
   totalRow.getCell(3).alignment = { horizontal: "center", vertical: "middle" };
 
-  totalRow.getCell(10).value = totalKmCalculado;
-  totalRow.getCell(10).numFmt = '#,##0 "km"';
-  totalRow.getCell(10).alignment = { horizontal: "right", vertical: "middle" };
+  totalRow.getCell(11).value = totalKmCalculado;
+  totalRow.getCell(11).numFmt = '#,##0 "km"';
+  totalRow.getCell(11).alignment = { horizontal: "right", vertical: "middle" };
 
   wsMain.views = [
     {

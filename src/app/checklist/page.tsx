@@ -25,6 +25,8 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   PlusCircleIcon,
+  SmartphoneIcon,
+  PenLineIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -48,7 +50,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/toast";
 import { PhotoUpload } from "@/components/PhotoUpload";
+import { SignaturePad } from "@/components/SignaturePad";
 import { VehicleCombobox } from "@/components/VehicleCombobox";
+import { OpecCombobox } from "@/components/OpecCombobox";
 import Image from "next/image";
 
 // Schema de Início do Checklist (KM Final é opcional)
@@ -56,6 +60,7 @@ const startChecklistSchema = z
   .object({
     centroOperacao: z.string().min(1, "Selecione o centro de operação"),
     veiculoId: z.string().min(1, "Informe a placa do veículo"),
+    opec: z.string().min(1, "Selecione ou informe o OPEC (celular corporativo)"),
     kmInicial: z.coerce.number().min(0, "KM inicial deve ser positivo"),
     kmFinal: z.coerce.number().optional().nullable(),
     
@@ -78,6 +83,9 @@ const startChecklistSchema = z
     fotoTras: z.string().optional(),
     fotoInterna: z.string().optional(),
     fotoCarroceria: z.string().optional(),
+
+    // Assinatura obrigatória
+    assinaturaTecnico: z.string().min(1, "A assinatura do técnico é obrigatória para concluir o checklist."),
   })
   .refine(
     (data) => {
@@ -105,6 +113,9 @@ const finalizeChecklistSchema = z
     fotoFimTras: z.string().optional(),
     fotoFimInterna: z.string().optional(),
     fotoFimCarroceria: z.string().optional(),
+
+    // Assinatura obrigatória no encerramento
+    assinaturaFimTecnico: z.string().min(1, "A assinatura do técnico é obrigatória para finalizar o checklist."),
   });
 
 type FinalizeChecklistFormValues = z.infer<typeof finalizeChecklistSchema>;
@@ -188,6 +199,7 @@ export default function ChecklistPage() {
   const [completedSummary, setCompletedSummary] = useState<{
     placa: string;
     modelo: string;
+    opec: string;
     kmInicial: number;
     kmFinal: number;
     kmRodados: number;
@@ -204,6 +216,7 @@ export default function ChecklistPage() {
     defaultValues: {
       centroOperacao: "",
       veiculoId: "",
+      opec: "",
       kmInicial: 0,
       kmFinal: undefined,
       nivelOleo: "",
@@ -223,6 +236,7 @@ export default function ChecklistPage() {
       fotoTras: "",
       fotoInterna: "",
       fotoCarroceria: "",
+      assinaturaTecnico: "",
     },
   });
 
@@ -238,6 +252,7 @@ export default function ChecklistPage() {
       fotoFimTras: "",
       fotoFimInterna: "",
       fotoFimCarroceria: "",
+      assinaturaFimTecnico: "",
     },
   });
 
@@ -261,7 +276,7 @@ export default function ChecklistPage() {
       const savedDraft = localStorage.getItem(draftKey);
       if (savedDraft) {
         const parsed = JSON.parse(savedDraft);
-        if (parsed && (parsed.veiculoId || parsed.centroOperacao || (parsed.kmInicial && parsed.kmInicial > 0))) {
+        if (parsed && (parsed.veiculoId || parsed.opec || parsed.centroOperacao || (parsed.kmInicial && parsed.kmInicial > 0))) {
           form.reset(parsed);
           setHasDraftRestored(true);
         }
@@ -275,7 +290,7 @@ export default function ChecklistPage() {
   useEffect(() => {
     const subscription = form.watch((value) => {
       try {
-        if (value.veiculoId || value.centroOperacao || (value.kmInicial && value.kmInicial > 0)) {
+        if (value.veiculoId || value.opec || value.centroOperacao || (value.kmInicial && value.kmInicial > 0)) {
           localStorage.setItem(draftKey, JSON.stringify(value));
         }
       } catch (e) {
@@ -292,6 +307,7 @@ export default function ChecklistPage() {
       form.reset({
         centroOperacao: "",
         veiculoId: "",
+        opec: "",
         kmInicial: 0,
         kmFinal: undefined,
         nivelOleo: "",
@@ -311,6 +327,7 @@ export default function ChecklistPage() {
         fotoTras: "",
         fotoInterna: "",
         fotoCarroceria: "",
+        assinaturaTecnico: "",
       });
       setHasDraftRestored(false);
       toast({
@@ -335,6 +352,7 @@ export default function ChecklistPage() {
         userName: user?.fullName || user?.firstName || "Técnico",
         userEmail: user?.primaryEmailAddress?.emailAddress || "",
         veiculoPlaca: values.veiculoId,
+        opec: values.opec,
         data: now.toISOString().split("T")[0],
         hora: horaAtual,
         centroOperacao: values.centroOperacao,
@@ -358,6 +376,8 @@ export default function ChecklistPage() {
         fotoTras: values.fotoTras ? (values.fotoTras as Id<"_storage">) : undefined,
         fotoInterna: values.fotoInterna ? (values.fotoInterna as Id<"_storage">) : undefined,
         fotoCarroceria: values.fotoCarroceria ? (values.fotoCarroceria as Id<"_storage">) : undefined,
+        
+        assinaturaTecnico: values.assinaturaTecnico || undefined,
       });
 
       // Limpa rascunho após salvar com sucesso
@@ -373,6 +393,7 @@ export default function ChecklistPage() {
         setCompletedSummary({
           placa: values.veiculoId,
           modelo: "Veículo Frota",
+          opec: values.opec,
           kmInicial: values.kmInicial,
           kmFinal: Number(values.kmFinal),
           kmRodados: Number(values.kmFinal) - values.kmInicial,
@@ -384,6 +405,7 @@ export default function ChecklistPage() {
         form.reset({
           centroOperacao: "",
           veiculoId: "",
+          opec: "",
           kmInicial: 0,
           kmFinal: undefined,
           nivelOleo: "",
@@ -403,6 +425,7 @@ export default function ChecklistPage() {
           fotoTras: "",
           fotoInterna: "",
           fotoCarroceria: "",
+          assinaturaTecnico: "",
         });
 
         toast({
@@ -456,6 +479,7 @@ export default function ChecklistPage() {
         fotoFimInterna: values.fotoFimInterna ? (values.fotoFimInterna as Id<"_storage">) : undefined,
         fotoFimCarroceria: values.fotoFimCarroceria ? (values.fotoFimCarroceria as Id<"_storage">) : undefined,
         observacoesFim: values.observacoesFim || undefined,
+        assinaturaFimTecnico: values.assinaturaFimTecnico || undefined,
       });
 
       // Limpa qualquer rascunho local
@@ -469,6 +493,7 @@ export default function ChecklistPage() {
       setCompletedSummary({
         placa: activeChecklist.veiculoPlaca,
         modelo: activeChecklist.veiculoModelo,
+        opec: activeChecklist.opec || "Não informado",
         kmInicial: activeChecklist.kmInicial,
         kmFinal: Number(values.kmFinal),
         kmRodados: Number(values.kmFinal) - activeChecklist.kmInicial,
@@ -481,6 +506,7 @@ export default function ChecklistPage() {
       form.reset({
         centroOperacao: "",
         veiculoId: "",
+        opec: "",
         kmInicial: 0,
         kmFinal: undefined,
         nivelOleo: "",
@@ -500,6 +526,7 @@ export default function ChecklistPage() {
         fotoTras: "",
         fotoInterna: "",
         fotoCarroceria: "",
+        assinaturaTecnico: "",
       });
 
       finalizeForm.reset({
@@ -511,6 +538,7 @@ export default function ChecklistPage() {
         fotoFimTras: "",
         fotoFimInterna: "",
         fotoFimCarroceria: "",
+        assinaturaFimTecnico: "",
       });
 
       setForceNewChecklist(false);
@@ -611,11 +639,20 @@ export default function ChecklistPage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-green-500/10 p-4 rounded-xl border border-green-500/20">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-green-500/10 p-4 rounded-xl border border-green-500/20">
                   <div>
                     <span className="text-[11px] font-medium text-muted-foreground uppercase">Veículo</span>
                     <p className="text-sm font-bold font-mono text-foreground">{completedSummary.placa}</p>
                     <p className="text-[11px] text-muted-foreground truncate">{completedSummary.modelo}</p>
+                  </div>
+
+                  <div>
+                    <span className="text-[11px] font-medium text-muted-foreground uppercase">Aparelho (OPEC)</span>
+                    <p className="text-sm font-bold text-foreground flex items-center gap-1">
+                      <SmartphoneIcon className="w-3.5 h-3.5 text-green-600" />
+                      {completedSummary.opec}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">Celular da operação</p>
                   </div>
 
                   <div>
@@ -680,17 +717,34 @@ export default function ChecklistPage() {
                     <CarIcon className="w-5 h-5 animate-pulse" />
                     <span>Checklist em Andamento (Em Rota)</span>
                   </div>
-                  <Badge className="bg-black text-primary font-mono text-xs px-2 py-0.5">
-                    {activeChecklist.veiculoPlaca}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {activeChecklist.opec && (
+                      <Badge className="bg-black/80 text-white font-bold text-xs px-2 py-0.5 flex items-center gap-1">
+                        <SmartphoneIcon className="w-3 h-3 text-primary" />
+                        {activeChecklist.opec}
+                      </Badge>
+                    )}
+                    <Badge className="bg-black text-primary font-mono text-xs px-2 py-0.5">
+                      {activeChecklist.veiculoPlaca}
+                    </Badge>
+                  </div>
                 </div>
 
                 <CardContent className="p-4 sm:p-6 space-y-4">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-muted/40 p-3.5 rounded-xl border">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-muted/40 p-3.5 rounded-xl border">
                     <div>
                       <span className="text-[11px] font-medium text-muted-foreground uppercase">Veículo</span>
                       <p className="text-sm font-bold font-mono text-foreground">{activeChecklist.veiculoPlaca}</p>
                       <p className="text-[11px] text-muted-foreground truncate">{activeChecklist.veiculoModelo}</p>
+                    </div>
+
+                    <div>
+                      <span className="text-[11px] font-medium text-muted-foreground uppercase">Aparelho (OPEC)</span>
+                      <p className="text-sm font-bold text-foreground flex items-center gap-1">
+                        <SmartphoneIcon className="w-3.5 h-3.5 text-primary" />
+                        {activeChecklist.opec || "Não informado"}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">Celular corporativo</p>
                     </div>
 
                     <div>
@@ -871,6 +925,39 @@ export default function ChecklistPage() {
                             )}
                           />
 
+                          {/* Assinatura do Técnico (Encerramento) */}
+                          <div className="space-y-3 border-t pt-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <PenLineIcon className="w-4 h-4 text-primary" />
+                              <h4 className="text-sm font-bold text-foreground">
+                                Assinatura do Técnico (Encerramento) <span className="text-destructive">*</span>
+                              </h4>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Assine abaixo para confirmar o encerramento das atividades e a entrega do veículo.
+                            </p>
+
+                            <FormField
+                              control={finalizeForm.control}
+                              name="assinaturaFimTecnico"
+                              render={({ field, fieldState }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <SignaturePad
+                                      label="Assinatura do Técnico (Encerramento)"
+                                      value={field.value}
+                                      onChange={(dataUrl) => field.onChange(dataUrl)}
+                                      onClear={() => field.onChange("")}
+                                      error={!!fieldState.error}
+                                      required={true}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
                           {/* Botão de Finalizar */}
                           <Button
                             type="submit"
@@ -960,7 +1047,9 @@ export default function ChecklistPage() {
                     <h3 className="text-lg font-bold border-b pb-2 text-primary flex items-center gap-2">
                       <span>1. Dados da Operação (Saída)</span>
                     </h3>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Linha 1, Coluna 1: Centro de Operação (Filial) */}
                       <FormField
                         control={form.control}
                         name="centroOperacao"
@@ -986,7 +1075,7 @@ export default function ChecklistPage() {
                             >
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Selecione a região/filial" />
+                                  <SelectValue placeholder="Selecione a filial" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
@@ -1000,16 +1089,17 @@ export default function ChecklistPage() {
                         )}
                       />
                       
+                      {/* Linha 1, Coluna 2: Veículo (Placa) */}
                       <FormField
                         control={form.control}
                         name="veiculoId"
                         render={({ field, fieldState }) => (
                           <FormItem>
-                            <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center justify-between gap-1">
                               <FormLabel className="truncate">Veículo (Placa)</FormLabel>
                               {selectedCentroOperacao && (
                                 <span className="text-[11px] text-muted-foreground font-medium shrink-0">
-                                  Filial {selectedCentroOperacao}: {availableVehicles.length} carro(s)
+                                  {availableVehicles.length} carro(s) disponível(is)
                                 </span>
                               )}
                             </div>
@@ -1021,23 +1111,44 @@ export default function ChecklistPage() {
                                 placeholder={
                                   !selectedCentroOperacao
                                     ? "Selecione o Centro de Operação primeiro..."
-                                    : `Selecione ou busque o veículo da Filial ${selectedCentroOperacao}...`
+                                    : `Selecione o veículo (${selectedCentroOperacao})...`
                                 }
                                 disabled={!selectedCentroOperacao}
                                 filialName={selectedCentroOperacao}
                                 error={!!fieldState.error}
                               />
                             </FormControl>
-                            {!selectedCentroOperacao ? (
+                            {!selectedCentroOperacao && (
                               <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
-                                ⚠️ Selecione o Centro de Operação primeiro para listar a frota desta filial.
+                                ⚠️ Selecione o Centro de Operação primeiro para listar a frota.
                               </p>
-                            ) : null}
+                            )}
                             <FormMessage />
                           </FormItem>
                         )}
                       />
 
+                      {/* Linha 2, Coluna 1: OPEC (Celular Corporativo) */}
+                      <FormField
+                        control={form.control}
+                        name="opec"
+                        render={({ field, fieldState }) => (
+                          <FormItem>
+                            <FormLabel className="truncate">OPEC (Celular Corporativo) *</FormLabel>
+                            <FormControl>
+                              <OpecCombobox
+                                value={field.value}
+                                onChange={field.onChange}
+                                placeholder="Selecione ou busque o OPEC..."
+                                error={!!fieldState.error}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Linha 2, Coluna 2: KM Inicial (Saída) */}
                       <FormField
                         control={form.control}
                         name="kmInicial"
@@ -1052,30 +1163,35 @@ export default function ChecklistPage() {
                         )}
                       />
 
-                      <FormField
-                        control={form.control}
-                        name="kmFinal"
-                        render={({ field }) => (
-                          <FormItem>
-                            <div className="flex items-center justify-between gap-2">
-                              <FormLabel className="truncate">KM Final (Opcional no início)</FormLabel>
-                              <span className="text-[11px] text-muted-foreground italic shrink-0">Pode preencher ao final</span>
-                            </div>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                placeholder="Deixe em branco se for preencher ao retornar"
-                                value={field.value ?? ""}
-                                onChange={(e) => {
-                                  const val = e.target.value ? Number(e.target.value) : undefined;
-                                  field.onChange(val);
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      {/* Linha 3: KM Final (Opcional no início) - 2 colunas com largura total */}
+                      <div className="md:col-span-2">
+                        <FormField
+                          control={form.control}
+                          name="kmFinal"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="flex items-center justify-between gap-2">
+                                <FormLabel className="truncate">KM Final (Opcional no início)</FormLabel>
+                                <span className="text-[11px] text-muted-foreground italic shrink-0">
+                                  Pode preencher ao final das atividades
+                                </span>
+                              </div>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  placeholder="Deixe em branco se for preencher ao retornar"
+                                  value={field.value ?? ""}
+                                  onChange={(e) => {
+                                    const val = e.target.value ? Number(e.target.value) : undefined;
+                                    field.onChange(val);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -1216,6 +1332,37 @@ export default function ChecklistPage() {
                         />
                       ))}
                     </div>
+                  </div>
+
+                  {/* 5. ASSINATURA DO TÉCNICO */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold border-b pb-2 text-primary flex items-center gap-2">
+                      <PenLineIcon className="w-5 h-5" />
+                      5. Assinatura do Técnico
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      O técnico responsável deve assinar abaixo para confirmar a veracidade das informações e concluir o checklist.
+                    </p>
+
+                    <FormField
+                      control={form.control}
+                      name="assinaturaTecnico"
+                      render={({ field, fieldState }) => (
+                        <FormItem>
+                          <FormControl>
+                            <SignaturePad
+                              label="Assinatura do Técnico (Saída)"
+                              value={field.value}
+                              onChange={(dataUrl) => field.onChange(dataUrl)}
+                              onClear={() => field.onChange("")}
+                              error={!!fieldState.error}
+                              required={true}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   {/* BOTÕES DE AÇÃO */}

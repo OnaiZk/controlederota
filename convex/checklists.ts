@@ -11,6 +11,7 @@ export const create = mutation({
     data: v.string(),
     hora: v.string(),
     centroOperacao: v.string(),
+    opec: v.optional(v.string()),
     kmInicial: v.number(),
     kmFinal: v.optional(v.number()),
     
@@ -43,6 +44,9 @@ export const create = mutation({
     fotoFimInterna: v.optional(v.id("_storage")),
     fotoFimCarroceria: v.optional(v.id("_storage")),
     observacoesFim: v.optional(v.string()),
+
+    // Assinatura do Técnico (obrigatória)
+    assinaturaTecnico: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // 1. Identifica ou cria o usuário
@@ -107,6 +111,7 @@ export const create = mutation({
       horaFinal: isFinalized ? args.hora : undefined,
       status,
       centroOperacao: args.centroOperacao,
+      opec: args.opec,
       kmInicial: args.kmInicial,
       kmFinal: args.kmFinal,
       nivelOleo: args.nivelOleo,
@@ -133,6 +138,7 @@ export const create = mutation({
       fotoFimInterna: args.fotoFimInterna,
       fotoFimCarroceria: args.fotoFimCarroceria,
       observacoesFim: args.observacoesFim,
+      assinaturaTecnico: args.assinaturaTecnico,
     });
 
     // Atualiza o kmAtual do veículo
@@ -218,6 +224,7 @@ export const finalize = mutation({
     fotoFimInterna: v.optional(v.id("_storage")),
     fotoFimCarroceria: v.optional(v.id("_storage")),
     observacoesFim: v.optional(v.string()),
+    assinaturaFimTecnico: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const checklist = await ctx.db.get(args.id);
@@ -241,6 +248,7 @@ export const finalize = mutation({
       fotoFimInterna: args.fotoFimInterna ?? checklist.fotoFimInterna,
       fotoFimCarroceria: args.fotoFimCarroceria ?? checklist.fotoFimCarroceria,
       observacoesFim: args.observacoesFim ?? checklist.observacoesFim,
+      assinaturaFimTecnico: args.assinaturaFimTecnico ?? checklist.assinaturaFimTecnico,
     });
 
     // Atualiza o KM atual do veículo
