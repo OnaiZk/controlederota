@@ -55,9 +55,30 @@ export const updateStatus = mutation({
   args: {
     id: v.id("vehicles"),
     status: v.union(v.literal("ATIVO"), v.literal("MANUTENCAO")),
+    motivo: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.id, { status: args.status });
+    const todayStr = new Date().toISOString().split("T")[0];
+    const nowHoraStr = new Date().toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    if (args.status === "MANUTENCAO") {
+      await ctx.db.patch(args.id, {
+        status: "MANUTENCAO",
+        dataEntradaManutencao: todayStr,
+        horaEntradaManutencao: nowHoraStr,
+        motivoManutencao: args.motivo ? args.motivo.trim() : undefined,
+      });
+    } else {
+      await ctx.db.patch(args.id, {
+        status: "ATIVO",
+        dataEntradaManutencao: undefined,
+        horaEntradaManutencao: undefined,
+        motivoManutencao: undefined,
+      });
+    }
   },
 });
 
@@ -89,14 +110,36 @@ export const updateVehicle = mutation({
     tag: v.optional(v.string()),
     centroOperacao: v.optional(v.string()),
     status: v.optional(v.union(v.literal("ATIVO"), v.literal("MANUTENCAO"))),
+    kmAtual: v.optional(v.number()),
+    proximaManutencaoKm: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    const existingVehicle = await ctx.db.get(args.id);
+    if (!existingVehicle) {
+      throw new Error("Veículo não encontrado.");
+    }
+
     const patchData: any = {};
-    if (args.placa !== undefined) patchData.placa = args.placa.toUpperCase().trim();
+    if (args.placa !== undefined) {
+      const placaClean = args.placa.toUpperCase().trim();
+      const duplicatePlaca = await ctx.db
+        .query("vehicles")
+        .withIndex("by_placa", (q) => q.eq("placa", placaClean))
+        .first();
+
+      if (duplicatePlaca && duplicatePlaca._id !== args.id) {
+        throw new Error("Já existe outro veículo cadastrado com esta placa.");
+      }
+      patchData.placa = placaClean;
+    }
+
     if (args.modelo !== undefined) patchData.modelo = args.modelo.trim();
     if (args.tag !== undefined) patchData.tag = args.tag ? args.tag.trim() : undefined;
     if (args.centroOperacao !== undefined) patchData.centroOperacao = args.centroOperacao;
     if (args.status !== undefined) patchData.status = args.status;
+    if (args.kmAtual !== undefined) patchData.kmAtual = args.kmAtual;
+    if (args.proximaManutencaoKm !== undefined) patchData.proximaManutencaoKm = args.proximaManutencaoKm;
+
     await ctx.db.patch(args.id, patchData);
   },
 });
@@ -112,6 +155,20 @@ export const updateManutencao = mutation({
     if (args.proximaManutencaoKm !== undefined) patchData.proximaManutencaoKm = args.proximaManutencaoKm;
     if (args.kmAtual !== undefined) patchData.kmAtual = args.kmAtual;
     await ctx.db.patch(args.id, patchData);
+  },
+});
+
+export const resetKm = mutation({
+  args: {
+    id: v.id("vehicles"),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db.get(args.id);
+    if (!existing) {
+      throw new Error("Veículo não encontrado.");
+    }
+    await ctx.db.patch(args.id, { kmAtual: 0 });
+    return args.id;
   },
 });
 

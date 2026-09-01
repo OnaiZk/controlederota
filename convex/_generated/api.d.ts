@@ -10,6 +10,7 @@
 
 import type * as checklists from "../checklists.js";
 import type * as files from "../files.js";
+import type * as maintenances from "../maintenances.js";
 import type * as opecs from "../opecs.js";
 import type * as users from "../users.js";
 import type * as vehicles from "../vehicles.js";
@@ -23,6 +24,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   checklists: typeof checklists;
   files: typeof files;
+  maintenances: typeof maintenances;
   opecs: typeof opecs;
   users: typeof users;
   vehicles: typeof vehicles;

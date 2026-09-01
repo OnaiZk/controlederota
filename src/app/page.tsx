@@ -1,20 +1,29 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Download } from "lucide-react";
 import { usePWA } from "@/components/PWAInstallPrompt";
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
   const { isLoaded, userId } = useAuth();
   const { isInstalled, installApp } = usePWA();
+  const router = useRouter();
 
-  if (isLoaded && userId) {
-    redirect("/checklist");
-  }
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded && userId) {
+      router.replace("/checklist");
+    }
+  }, [isLoaded, userId, router]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] p-4 bg-background">
@@ -65,7 +74,7 @@ export default function Home() {
             </Button>
           </SignUpButton>
 
-          {!isInstalled && (
+          {mounted && !isInstalled && (
             <div className="pt-2">
               <Button
                 type="button"

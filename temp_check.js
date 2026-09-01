@@ -236,6 +236,7 @@ export default function DashboardPage() {
   const [reactivateKm, setReactivateKm] = useState("");
   const [reactivateProximaManutencao, setReactivateProximaManutencao] = useState("");
   const [reactivateOficina, setReactivateOficina] = useState("");
+  const [reactivateCusto, setReactivateCusto] = useState("");
   const [reactivateData, setReactivateData] = useState(todayStr);
   const [isReactivating, setIsReactivating] = useState(false);
 
@@ -252,6 +253,7 @@ export default function DashboardPage() {
       setReactivateProximaManutencao((baseKm + 10000).toString());
     }
     setReactivateOficina("");
+    setReactivateCusto("");
     setReactivateData(todayStr);
   };
 
@@ -271,6 +273,7 @@ export default function DashboardPage() {
     try {
       const kmNum = reactivateKm ? parseInt(reactivateKm) : undefined;
       const proxKmNum = reactivateProximaManutencao ? parseInt(reactivateProximaManutencao) : undefined;
+      const custoNum = reactivateCusto ? parseFloat(reactivateCusto.replace(",", ".")) : undefined;
 
       await reativarVeiculoMutation({
         vehicleId: vehicleToReactivate._id,
@@ -279,6 +282,7 @@ export default function DashboardPage() {
         kmManutencao: kmNum,
         proximaManutencaoKm: proxKmNum,
         oficina: reactivateOficina.trim() || undefined,
+        custo: custoNum,
         dataReativacao: reactivateData || todayStr,
         realizadoPorNome: currentUser?.name || user?.fullName || "Líder",
         realizadoPorEmail: currentUser?.email || user?.primaryEmailAddress?.emailAddress || undefined,
@@ -1345,7 +1349,7 @@ export default function DashboardPage() {
   const maintenanceKPIs = useMemo(() => {
     const total = maintenances?.length || 0;
     const emManutencao = vehicles?.filter((v) => v.status === "MANUTENCAO").length || 0;
-    const veiculosAtendidos = new Set(maintenances?.map((m) => m.placa) || []).size;
+    const totalCusto = maintenances?.reduce((acc, curr) => acc + (curr.custo || 0), 0) || 0;
     const preventivas =
       maintenances?.filter(
         (m) =>
@@ -1360,44 +1364,11 @@ export default function DashboardPage() {
     return {
       total,
       emManutencao,
-      veiculosAtendidos,
+      totalCusto,
       preventivas,
       corretivas,
     };
   }, [maintenances, vehicles]);
-
-  // Veículos atualmente com status MANUTENCAO
-  const vehiclesInMaintenance = useMemo(() => {
-    if (!vehicles) return [];
-    return vehicles.filter((v) => v.status === "MANUTENCAO");
-  }, [vehicles]);
-
-  const displayedVehiclesInMaintenance = useMemo(() => {
-    return vehiclesInMaintenance.filter((v) => {
-      // Filtro de filial
-      if (maintenanceFilialFilter !== "TODAS") {
-        const vCentro = (v.centroOperacao || "").trim().toLowerCase();
-        if (maintenanceFilialFilter === "SEM_FILIAL") {
-          if (vCentro !== "") return false;
-        } else {
-          if (vCentro !== maintenanceFilialFilter.toLowerCase()) return false;
-        }
-      }
-
-      // Busca textual
-      if (maintenanceSearch.trim()) {
-        const q = maintenanceSearch.trim().toLowerCase();
-        const matchesPlaca = (v.placa || "").toLowerCase().includes(q);
-        const matchesTag = (v.tag || "").toLowerCase().includes(q);
-        const matchesModelo = (v.modelo || "").toLowerCase().includes(q);
-        const matchesMotivo = (v.motivoManutencao || "").toLowerCase().includes(q);
-        const matchesFilial = (v.centroOperacao || "").toLowerCase().includes(q);
-        return matchesPlaca || matchesTag || matchesModelo || matchesMotivo || matchesFilial;
-      }
-
-      return true;
-    });
-  }, [vehiclesInMaintenance, maintenanceFilialFilter, maintenanceSearch]);
 
   const handleCreateVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1666,13 +1637,8 @@ export default function DashboardPage() {
           <TabsTrigger value="vehicles" className="font-bold">
             Veículos ({vehicles?.length || 0})
           </TabsTrigger>
-          <TabsTrigger value="manutencoes" className="font-bold flex items-center justify-center gap-1.5">
-            <span>Manutenções ({maintenances?.length || 0})</span>
-            {vehiclesInMaintenance.length > 0 && (
-              <span className="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-extrabold animate-pulse">
-                {vehiclesInMaintenance.length} na oficina
-              </span>
-            )}
+          <TabsTrigger value="manutencoes" className="font-bold">
+            Manutenções ({maintenances?.length || 0})
           </TabsTrigger>
           <TabsTrigger value="opecs" className="font-bold">
             OPECs ({opecs?.length || 0})
@@ -2114,7 +2080,7 @@ export default function DashboardPage() {
                                 </div>
                               </TableCell>
                               <TableCell className="text-right">
-                                <div className="flex justify-end gap-1.5 flex-nowrap">
+                                <div className="flex justify-end gap-1.5 flex-wrap">
                                   <Button
                                     size="sm"
                                     variant="outline"
@@ -2254,15 +2220,20 @@ export default function DashboardPage() {
             <Card className="shadow-xs border-border bg-card">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Veículos Atendidos
+                  Investimento Acumulado
                 </CardTitle>
-                <CarIcon className="w-5 h-5 text-primary" />
+                <DollarSignIcon className="w-5 h-5 text-emerald-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-extrabold text-foreground">
-                  {maintenanceKPIs.veiculosAtendidos}
+                <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
+                  {maintenanceKPIs.totalCusto > 0
+                    ? `R$ ${maintenanceKPIs.totalCusto.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}`
+                    : "R$ 0,00"}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">Carros que já passaram por revisão</p>
+                <p className="text-xs text-muted-foreground mt-1">Custo total informado em reparos</p>
               </CardContent>
             </Card>
 
@@ -2286,143 +2257,6 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </div>
-
-          {/* SEÇÃO: VEÍCULOS ATUALMENTE EM MANUTENÇÃO */}
-          {vehiclesInMaintenance.length > 0 && (
-            <Card className="border-amber-400/80 dark:border-amber-600/60 bg-amber-500/[0.04] shadow-sm">
-              <CardHeader className="pb-3 border-b border-amber-400/30 dark:border-amber-600/30 bg-amber-500/[0.08]">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                  <div>
-                    <CardTitle className="flex items-center gap-2 text-amber-800 dark:text-amber-300 text-base font-bold">
-                      <WrenchIcon className="w-5 h-5 text-amber-600 animate-pulse" />
-                      <span>Veículos em Manutenção no Momento</span>
-                      <Badge variant="destructive" className="bg-red-600 hover:bg-red-600 text-white font-bold text-xs">
-                        {displayedVehiclesInMaintenance.length} na oficina
-                      </Badge>
-                    </CardTitle>
-                    <CardDescription className="text-xs text-amber-900/80 dark:text-amber-200/80 mt-0.5">
-                      Veículos que foram colocados em manutenção e estão indisponíveis na frota. Ao finalizar o reparo, clique em <strong>Reativar</strong> para informar o que foi feito e liberar o carro.
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <div className="rounded-lg border border-amber-300/40 dark:border-amber-800/40 bg-card overflow-x-auto shadow-2xs">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-amber-500/10">
-                        <TableHead className="w-[140px] font-bold text-amber-950 dark:text-amber-100">Entrada na Oficina</TableHead>
-                        <TableHead className="font-bold text-amber-950 dark:text-amber-100">Veículo</TableHead>
-                        <TableHead className="font-bold text-amber-950 dark:text-amber-100">Filial</TableHead>
-                        <TableHead className="font-bold text-amber-950 dark:text-amber-100">KM Atual</TableHead>
-                        <TableHead className="min-w-[280px] font-bold text-amber-950 dark:text-amber-100">Motivo / Defeito Relatado</TableHead>
-                        <TableHead className="text-right w-[150px] font-bold text-amber-950 dark:text-amber-100">Ação</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {displayedVehiclesInMaintenance.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center py-6 text-xs text-muted-foreground">
-                            Nenhum veículo em manutenção encontrado com os filtros aplicados.
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        displayedVehiclesInMaintenance.map((v) => {
-                          let dataEntradaFmt = v.dataEntradaManutencao;
-                          if (dataEntradaFmt && dataEntradaFmt.includes("-")) {
-                            const p = dataEntradaFmt.split("-");
-                            if (p.length === 3) dataEntradaFmt = `${p[2]}/${p[1]}/${p[0]}`;
-                          }
-
-                          return (
-                            <TableRow key={v._id} className="hover:bg-amber-500/[0.06] transition-colors">
-                              {/* Data e Hora de Entrada */}
-                              <TableCell className="font-medium">
-                                <div className="text-xs font-bold text-foreground">
-                                  {dataEntradaFmt || "Data não inf."}
-                                </div>
-                                {v.horaEntradaManutencao && (
-                                  <div className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                                    <ClockIcon className="w-3 h-3 text-amber-600" />
-                                    {v.horaEntradaManutencao}
-                                  </div>
-                                )}
-                              </TableCell>
-
-                              {/* Veículo */}
-                              <TableCell>
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  {v.tag && (
-                                    <Badge className="bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/40 font-bold text-[10px] px-1.5 py-0">
-                                      TAG {v.tag}
-                                    </Badge>
-                                  )}
-                                  <span className="font-mono font-bold text-xs bg-muted px-1.5 py-0.5 rounded border">
-                                    {v.placa}
-                                  </span>
-                                </div>
-                                {v.modelo && (
-                                  <div className="text-xs text-muted-foreground mt-0.5 truncate max-w-[160px]">
-                                    {v.modelo}
-                                  </div>
-                                )}
-                              </TableCell>
-
-                              {/* Filial */}
-                              <TableCell>
-                                {v.centroOperacao ? (
-                                  <Badge variant="secondary" className="text-xs font-semibold">
-                                    {v.centroOperacao}
-                                  </Badge>
-                                ) : (
-                                  <span className="text-xs text-muted-foreground">-</span>
-                                )}
-                              </TableCell>
-
-                              {/* KM Atual */}
-                              <TableCell>
-                                <div className="text-xs font-mono font-semibold">
-                                  {v.kmAtual !== undefined && v.kmAtual !== null && v.kmAtual > 0
-                                    ? `${v.kmAtual.toLocaleString()} km`
-                                    : "N/I"}
-                                </div>
-                              </TableCell>
-
-                              {/* Motivo / Defeito */}
-                              <TableCell>
-                                <div className="bg-amber-500/15 border border-amber-500/30 p-2.5 rounded-lg text-xs leading-relaxed">
-                                  <div className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1 mb-1">
-                                    <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                                    Motivo da entrada:
-                                  </div>
-                                  <div className="text-foreground font-medium whitespace-pre-wrap">
-                                    {v.motivoManutencao || "Nenhum motivo ou defeito detalhado ao colocar em manutenção."}
-                                  </div>
-                                </div>
-                              </TableCell>
-
-                              {/* Ação: Reativar */}
-                              <TableCell className="text-right">
-                                <Button
-                                  size="sm"
-                                  className="h-8 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
-                                  onClick={() => handleOpenReactivate(v)}
-                                  title="Reativar veículo e registrar o que foi feito no carro"
-                                >
-                                  <CheckIcon className="w-3.5 h-3.5 mr-1" />
-                                  Reativar Carro
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Listagem Geral de Manutenções com Filtros */}
           <Card className="shadow-sm">
@@ -2545,7 +2379,7 @@ export default function DashboardPage() {
                       <TableHead>KM Manutenção</TableHead>
                       <TableHead>Tipo</TableHead>
                       <TableHead className="min-w-[280px]">O Que Foi Feito no Carro</TableHead>
-                      <TableHead>Oficina / Prestador</TableHead>
+                      <TableHead>Oficina / Custo</TableHead>
                       <TableHead>Líder Responsável</TableHead>
                       <TableHead className="text-right w-[80px]">Ações</TableHead>
                     </TableRow>
@@ -2691,13 +2525,18 @@ export default function DashboardPage() {
                               </div>
                             </TableCell>
 
-                            {/* Oficina / Prestador */}
+                            {/* Oficina e Custo */}
                             <TableCell>
                               <div className="text-xs">
                                 {m.oficina ? (
                                   <div className="font-medium text-foreground">{m.oficina}</div>
                                 ) : (
-                                  <div className="text-muted-foreground text-xs italic">Não informada</div>
+                                  <div className="text-muted-foreground text-xs italic">Oficina não inf.</div>
+                                )}
+                                {m.custo !== undefined && m.custo !== null && m.custo > 0 && (
+                                  <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                                    R$ {m.custo.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                  </div>
                                 )}
                               </div>
                             </TableCell>
@@ -3661,7 +3500,7 @@ export default function DashboardPage() {
                 <Label htmlFor="edit-status">Status do Veículo</Label>
                 <Select
                   value={editStatus}
-                  onValueChange={(val) => val && setEditStatus(val as "ATIVO" | "MANUTENCAO")}
+                  onValueChange={(val: "ATIVO" | "MANUTENCAO") => val && setEditStatus(val)}
                 >
                   <SelectTrigger id="edit-status">
                     <SelectValue placeholder="Selecione o status" />
@@ -4174,15 +4013,28 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Oficina / Prestador */}
-            <div className="space-y-2">
-              <Label htmlFor="reactivate-oficina">Oficina / Mecânica / Prestador (Opcional)</Label>
-              <Input
-                id="reactivate-oficina"
-                placeholder="Ex: Oficina Central, Concessionária, Auto Mecânica"
-                value={reactivateOficina}
-                onChange={(e) => setReactivateOficina(e.target.value)}
-              />
+            {/* Grid: Oficina e Custo */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="reactivate-oficina">Oficina / Mecânica / Prestador (Opcional)</Label>
+                <Input
+                  id="reactivate-oficina"
+                  placeholder="Ex: Oficina Central, Concessionária"
+                  value={reactivateOficina}
+                  onChange={(e) => setReactivateOficina(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="reactivate-custo">Custo / Valor Total em R$ (Opcional)</Label>
+                <Input
+                  id="reactivate-custo"
+                  type="text"
+                  placeholder="Ex: 450,00"
+                  value={reactivateCusto}
+                  onChange={(e) => setReactivateCusto(e.target.value)}
+                />
+              </div>
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-3 border-t">
@@ -4411,6 +4263,11 @@ export default function DashboardPage() {
                               <div>
                                 <span className="font-semibold text-foreground">Oficina:</span>{" "}
                                 {rec.oficina}
+                              </div>
+                            )}
+                            {rec.custo !== undefined && rec.custo !== null && rec.custo > 0 && (
+                              <div className="text-emerald-600 dark:text-emerald-400 font-bold">
+                                Custo: R$ {rec.custo.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </div>
                             )}
                             <div>

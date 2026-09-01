@@ -18,9 +18,50 @@ export default defineSchema({
     centroOperacao: v.optional(v.string()),
     kmAtual: v.optional(v.number()),
     proximaManutencaoKm: v.optional(v.number()),
+    dataEntradaManutencao: v.optional(v.string()), // Data ISO (YYYY-MM-DD) quando entrou em manutenção
+    horaEntradaManutencao: v.optional(v.string()), // HH:mm
+    motivoManutencao: v.optional(v.string()), // Motivo/defeito relatado ao entrar em manutenção
+    ultimaManutencaoData: v.optional(v.string()), // Data da última manutenção concluída
+    ultimaManutencaoDescricao: v.optional(v.string()), // Resumo do que foi feito na última manutenção
   })
     .index("by_placa", ["placa"])
     .index("by_tag", ["tag"])
+    .index("by_centroOperacao", ["centroOperacao"])
+    .index("by_status", ["status"]),
+
+  maintenances: defineTable({
+    vehicleId: v.id("vehicles"),
+    placa: v.string(),
+    modelo: v.optional(v.string()),
+    tag: v.optional(v.string()),
+    centroOperacao: v.optional(v.string()),
+
+    // Datas e Horários
+    dataEntrada: v.optional(v.string()), // Data ISO (YYYY-MM-DD) da entrada na manutenção
+    horaEntrada: v.optional(v.string()), // HH:mm
+    dataReativacao: v.string(), // Data ISO (YYYY-MM-DD) da conclusão / reativação
+    horaReativacao: v.optional(v.string()), // HH:mm
+
+    // Informações Técnicas e Serviços
+    kmManutencao: v.optional(v.number()), // KM no momento da manutenção
+    motivoEntrada: v.optional(v.string()), // Problema ou motivo informado na entrada
+    descricaoServico: v.string(), // O que foi feito no carro (Obrigatório)
+    tipoManutencao: v.optional(v.string()), // "PREVENTIVA", "CORRETIVA", "REVISAO", "PNEUS", "ELETRICA", "FUNILARIA", "OUTRO"
+    oficina: v.optional(v.string()), // Oficina / Mecânica / Concessionária
+    custo: v.optional(v.number()), // Valor / Custo em R$
+    proximaRevisaoKm: v.optional(v.number()), // Próxima revisão configurada após a manutenção
+
+    // Responsável (Líder)
+    realizadoPorNome: v.string(),
+    realizadoPorEmail: v.optional(v.string()),
+    userId: v.optional(v.id("users")),
+
+    status: v.literal("CONCLUIDA"),
+    criadoEm: v.number(), // Timestamp Unix (Date.now())
+  })
+    .index("by_vehicleId", ["vehicleId"])
+    .index("by_placa", ["placa"])
+    .index("by_dataReativacao", ["dataReativacao"])
     .index("by_centroOperacao", ["centroOperacao"]),
 
   opecs: defineTable({

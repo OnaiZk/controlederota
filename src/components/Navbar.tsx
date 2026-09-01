@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { UserButton, useUser, useAuth } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
+import { UserButton, useUser, useAuth, SignInButton } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { motion } from "framer-motion";
@@ -15,8 +15,13 @@ import { usePWA } from "@/components/PWAInstallPrompt";
 
 export function Navbar() {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
   const { user, isLoaded } = useUser();
   const { isSignedIn } = useAuth();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const syncUser = useMutation(api.users.syncUser);
   const currentUser = useQuery(
@@ -62,7 +67,7 @@ export function Navbar() {
         </Link>
 
         {/* Navigation Links with animated active indicator */}
-        {isSignedIn && (
+        {mounted && isSignedIn && (
           <nav className="flex items-center gap-2 sm:gap-6">
             {navLinks.map((link) => {
               const isActive = pathname.startsWith(link.path);
@@ -102,51 +107,70 @@ export function Navbar() {
         )}
 
         {/* User Profile, Role & Install Button */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {!isInstalled && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={installApp}
-              className="flex items-center gap-1.5 text-xs font-semibold text-[#FF4F00] border-[#FF4F00]/30 hover:bg-[#FF4F00]/10 hover:text-[#FF4F00] rounded-xl h-8 px-2.5 transition-all"
-              title="Instalar como aplicativo no dispositivo"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Instalar App</span>
-            </Button>
-          )}
+        <div className="flex items-center gap-2 sm:gap-3 min-h-[36px]">
+          {mounted && (
+            <>
+              {!isInstalled && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={installApp}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-[#FF4F00] border-[#FF4F00]/30 hover:bg-[#FF4F00]/10 hover:text-[#FF4F00] rounded-xl h-8 px-2.5 transition-all"
+                  title="Instalar como aplicativo no dispositivo"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Instalar App</span>
+                </Button>
+              )}
 
-          {user && (
-            <div className="hidden md:flex flex-col text-right">
-              <span className="text-xs font-bold leading-tight truncate max-w-[160px]">
-                {user.fullName || user.firstName}
-              </span>
-              <span className="text-[10px] text-muted-foreground truncate max-w-[160px]">
-                {user.primaryEmailAddress?.emailAddress}
-              </span>
-            </div>
-          )}
+              {isSignedIn && (
+                <>
+                  {user && (
+                    <div className="hidden md:flex flex-col text-right">
+                      <span className="text-xs font-bold leading-tight truncate max-w-[160px]">
+                        {user.fullName || user.firstName}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground truncate max-w-[160px]">
+                        {user.primaryEmailAddress?.emailAddress}
+                      </span>
+                    </div>
+                  )}
 
-          {currentUser && (
-            <Badge
-              variant={currentUser.role === "LIDER" ? "default" : "secondary"}
-              className={`hidden sm:inline-flex text-xs font-bold ${
-                currentUser.role === "LIDER"
-                  ? "bg-primary text-black hover:bg-primary/90"
-                  : ""
-              }`}
-            >
-              {currentUser.role === "LIDER" ? "LÍDER" : "TÉCNICO"}
-            </Badge>
-          )}
+                  {currentUser && (
+                    <Badge
+                      variant={currentUser.role === "LIDER" ? "default" : "secondary"}
+                      className={`hidden sm:inline-flex text-xs font-bold ${
+                        currentUser.role === "LIDER"
+                          ? "bg-primary text-black hover:bg-primary/90"
+                          : ""
+                      }`}
+                    >
+                      {currentUser.role === "LIDER" ? "LÍDER" : "TÉCNICO"}
+                    </Badge>
+                  )}
 
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: "w-9 h-9 ring-2 ring-primary/30",
-              },
-            }}
-          />
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-9 h-9 ring-2 ring-primary/30",
+                      },
+                    }}
+                  />
+                </>
+              )}
+
+              {!isSignedIn && (
+                <SignInButton mode="modal">
+                  <Button
+                    size="sm"
+                    className="bg-[#FF4F00] hover:bg-[#E04500] text-white font-bold rounded-xl h-8 px-3 text-xs transition-all shadow-sm"
+                  >
+                    Entrar
+                  </Button>
+                </SignInButton>
+              )}
+            </>
+          )}
         </div>
       </div>
     </header>

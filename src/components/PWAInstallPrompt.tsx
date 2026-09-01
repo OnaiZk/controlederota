@@ -50,8 +50,10 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
   const [isIOS, setIsIOS] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [showBanner, setShowBanner] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // 1. Registrar Service Worker
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       navigator.serviceWorker
@@ -166,7 +168,7 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
       {children}
 
       {/* Banner Flutuante Inferior de Instalação */}
-      {showBanner && !isInstalled && (
+      {mounted && showBanner && !isInstalled && (
         <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
           <div className="bg-white border border-primary/20 shadow-2xl rounded-2xl p-4 flex items-center gap-3.5 relative overflow-hidden backdrop-blur-md">
             <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-[#FF4F00]" />

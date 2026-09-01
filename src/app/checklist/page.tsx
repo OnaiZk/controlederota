@@ -268,25 +268,25 @@ export default function ChecklistPage() {
   // Observa o Centro de Operação (Filial) selecionado para filtrar a frota e OPECs
   const selectedCentroOperacao = form.watch("centroOperacao");
 
-  // Filtra apenas os carros da filial selecionada
+  // Filtra apenas os carros da filial selecionada que estejam com status ATIVO
   const availableVehicles = useMemo(() => {
     if (!vehicles) return [];
     if (!selectedCentroOperacao) return [];
     return vehicles.filter((v) => {
       const vCentro = (v.centroOperacao || "").trim().toLowerCase();
       const targetCentro = selectedCentroOperacao.trim().toLowerCase();
-      return vCentro === targetCentro;
+      return vCentro === targetCentro && v.status !== "MANUTENCAO";
     });
   }, [vehicles, selectedCentroOperacao]);
 
-  // Filtra apenas os OPECs da filial selecionada
+  // Filtra apenas os OPECs da filial selecionada que estejam com status ATIVO
   const availableOpecs = useMemo(() => {
     if (!opecs) return [];
     if (!selectedCentroOperacao) return [];
     return opecs.filter((o) => {
       const oCentro = (o.centroOperacao || "").trim().toLowerCase();
       const targetCentro = selectedCentroOperacao.trim().toLowerCase();
-      return oCentro === targetCentro;
+      return oCentro === targetCentro && o.status !== "MANUTENCAO";
     });
   }, [opecs, selectedCentroOperacao]);
 
