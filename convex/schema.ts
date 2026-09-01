@@ -23,6 +23,16 @@ export default defineSchema({
     .index("by_tag", ["tag"])
     .index("by_centroOperacao", ["centroOperacao"]),
 
+  opecs: defineTable({
+    codigo: v.string(), // Identificador do aparelho (ex: "OPEC 01", "OPEC Reserva", etc.)
+    descricao: v.optional(v.string()), // Modelo / Descrição (ex: "Samsung Galaxy A14", "Motorola G54")
+    centroOperacao: v.optional(v.string()), // Filial (ex: "Matriz", "Sul", "Leste", "T.I")
+    status: v.union(v.literal("ATIVO"), v.literal("MANUTENCAO")),
+  })
+    .index("by_codigo", ["codigo"])
+    .index("by_centroOperacao", ["centroOperacao"])
+    .index("by_status", ["status"]),
+
   checklists: defineTable({
     userId: v.id("users"),
     vehicleId: v.id("vehicles"),

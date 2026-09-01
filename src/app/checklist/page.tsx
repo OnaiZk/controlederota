@@ -154,7 +154,7 @@ const departurePhotoItems: { id: ChecklistPhotoKey; label: string }[] = [
   { id: "fotoLadoEsquerdo", label: "Lado Esquerdo" },
   { id: "fotoLadoDireito", label: "Lado Direito" },
   { id: "fotoTras", label: "Traseira" },
-  { id: "fotoInterna", label: "Parte Interna" },
+  { id: "fotoInterna", label: "Foto Painel" },
   { id: "fotoCarroceria", label: "Carroceria" },
 ];
 
@@ -171,7 +171,7 @@ const returnPhotoItems: { id: ReturnPhotoKey; label: string }[] = [
   { id: "fotoFimLadoEsquerdo", label: "Lado Esquerdo (Retorno)" },
   { id: "fotoFimLadoDireito", label: "Lado Direito (Retorno)" },
   { id: "fotoFimTras", label: "Traseira (Retorno)" },
-  { id: "fotoFimInterna", label: "Parte Interna (Retorno)" },
+  { id: "fotoFimInterna", label: "Foto Painel (Retorno)" },
   { id: "fotoFimCarroceria", label: "Carroceria (Retorno)" },
 ];
 
@@ -182,6 +182,8 @@ export default function ChecklistPage() {
   const createChecklist = useMutation(api.checklists.create);
   const finalizeChecklist = useMutation(api.checklists.finalize);
   const vehicles = useQuery(api.vehicles.list);
+  const opecs = useQuery(api.opecs.list);
+  const initializeDefaultOpecs = useMutation(api.opecs.initializeDefaultOpecs);
   const activeChecklist = useQuery(
     api.checklists.getActiveChecklist,
     user?.id ? { clerkId: user.id } : "skip"
@@ -191,6 +193,13 @@ export default function ChecklistPage() {
     user?.id ? { clerkId: user.id } : "skip"
   );
   const isLeader = currentUser?.role === "LIDER";
+
+  // Auto-inicializa os OPECs padrão da Matriz se a base estiver vazia
+  useEffect(() => {
+    if (opecs !== undefined && opecs.length === 0) {
+      initializeDefaultOpecs().catch(console.error);
+    }
+  }, [opecs, initializeDefaultOpecs]);
 
   const [forceNewChecklist, setForceNewChecklist] = useState(false);
   const [hasDraftRestored, setHasDraftRestored] = useState(false);
@@ -256,7 +265,7 @@ export default function ChecklistPage() {
     },
   });
 
-  // Observa o Centro de Operação (Filial) selecionado para filtrar a frota
+  // Observa o Centro de Operação (Filial) selecionado para filtrar a frota e OPECs
   const selectedCentroOperacao = form.watch("centroOperacao");
 
   // Filtra apenas os carros da filial selecionada
@@ -269,6 +278,17 @@ export default function ChecklistPage() {
       return vCentro === targetCentro;
     });
   }, [vehicles, selectedCentroOperacao]);
+
+  // Filtra apenas os OPECs da filial selecionada
+  const availableOpecs = useMemo(() => {
+    if (!opecs) return [];
+    if (!selectedCentroOperacao) return [];
+    return opecs.filter((o) => {
+      const oCentro = (o.centroOperacao || "").trim().toLowerCase();
+      const targetCentro = selectedCentroOperacao.trim().toLowerCase();
+      return oCentro === targetCentro;
+    });
+  }, [opecs, selectedCentroOperacao]);
 
   // Auto-Save: Recupera rascunho do LocalStorage ao montar
   useEffect(() => {
@@ -796,7 +816,7 @@ export default function ChecklistPage() {
                             { label: "Esquerda", url: activeChecklist.photoUrls?.ladoEsquerdo },
                             { label: "Direita", url: activeChecklist.photoUrls?.ladoDireito },
                             { label: "Traseira", url: activeChecklist.photoUrls?.tras },
-                            { label: "Interna", url: activeChecklist.photoUrls?.interna },
+                            { label: "Foto Painel", url: activeChecklist.photoUrls?.interna },
                             { label: "Carroceria", url: activeChecklist.photoUrls?.carroceria },
                           ].map((f) => (
                             <div key={f.label} className="border rounded-lg p-1 bg-card text-center">
@@ -1070,6 +1090,16 @@ export default function ChecklistPage() {
                                     form.setValue("veiculoId", "");
                                   }
                                 }
+                                // Se o OPEC atual não pertencer à nova filial selecionada, limpa a seleção
+                                const currentOpec = form.getValues("opec");
+                                if (currentOpec && opecs) {
+                                  const currentOpecItem = opecs.find(
+                                    (o) => o.codigo.toUpperCase() === currentOpec.toUpperCase()
+                                  );
+                                  if (currentOpecItem && currentOpecItem.centroOperacao && currentOpecItem.centroOperacao.toLowerCase() !== chosen.toLowerCase()) {
+                                    form.setValue("opec", "");
+                                  }
+                                }
                               }}
                               value={field.value}
                             >
@@ -1082,6 +1112,7 @@ export default function ChecklistPage() {
                                 <SelectItem value="Sul">Sul</SelectItem>
                                 <SelectItem value="Leste">Leste</SelectItem>
                                 <SelectItem value="Matriz">Matriz</SelectItem>
+                                <SelectItem value="T.I">T.I</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -1134,15 +1165,34 @@ export default function ChecklistPage() {
                         name="opec"
                         render={({ field, fieldState }) => (
                           <FormItem>
-                            <FormLabel className="truncate">OPEC (Celular Corporativo) *</FormLabel>
+                            <div className="flex items-center justify-between gap-1">
+                              <FormLabel className="truncate">OPEC (Celular Corporativo) *</FormLabel>
+                              {selectedCentroOperacao && (
+                                <span className="text-[11px] text-muted-foreground font-medium shrink-0">
+                                  {availableOpecs.length} OPEC(s) disponível(is)
+                                </span>
+                              )}
+                            </div>
                             <FormControl>
                               <OpecCombobox
                                 value={field.value}
                                 onChange={field.onChange}
-                                placeholder="Selecione ou busque o OPEC..."
+                                opecs={availableOpecs}
+                                placeholder={
+                                  !selectedCentroOperacao
+                                    ? "Selecione o Centro de Operação primeiro..."
+                                    : `Selecione o OPEC (${selectedCentroOperacao})...`
+                                }
+                                disabled={!selectedCentroOperacao}
+                                filialName={selectedCentroOperacao}
                                 error={!!fieldState.error}
                               />
                             </FormControl>
+                            {!selectedCentroOperacao && (
+                              <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                                ⚠️ Selecione o Centro de Operação primeiro para listar os OPECs.
+                              </p>
+                            )}
                             <FormMessage />
                           </FormItem>
                         )}

@@ -104,9 +104,10 @@ export default function DashboardPage() {
     isLeader && selectedChecklistId ? { id: selectedChecklistId } : "skip"
   );
   const vehicles = useQuery(api.vehicles.list, isLeader ? {} : "skip");
+  const opecs = useQuery(api.opecs.list, isLeader ? {} : "skip");
   const usersList = useQuery(api.users.list, isLeader ? {} : "skip");
 
-  // Mutações
+  // Mutações de Veículos e Usuários
   const createVehicle = useMutation(api.vehicles.create);
   const updateVehicle = useMutation(api.vehicles.updateVehicle);
   const updateVehicleStatus = useMutation(api.vehicles.updateStatus);
@@ -118,6 +119,14 @@ export default function DashboardPage() {
   const removeChecklist = useMutation(api.checklists.remove);
   const removeVehicle = useMutation(api.vehicles.remove);
   const removeAllVehicles = useMutation(api.vehicles.removeAll);
+
+  // Mutações de OPEC
+  const createOpec = useMutation(api.opecs.create);
+  const updateOpec = useMutation(api.opecs.updateOpec);
+  const updateOpecStatus = useMutation(api.opecs.updateStatus);
+  const removeOpec = useMutation(api.opecs.remove);
+  const removeAllOpecs = useMutation(api.opecs.removeAll);
+  const initializeDefaultOpecs = useMutation(api.opecs.initializeDefaultOpecs);
 
   // Form states para Veículo
   const [newPlaca, setNewPlaca] = useState("");
@@ -134,6 +143,23 @@ export default function DashboardPage() {
   const [isBatchAssigning, setIsBatchAssigning] = useState(false);
   const [newProximaManutencao, setNewProximaManutencao] = useState("");
   const [isExporting, setIsExporting] = useState(false);
+
+  // Form states para OPEC
+  const [newOpecCodigo, setNewOpecCodigo] = useState("");
+  const [newOpecDescricao, setNewOpecDescricao] = useState("");
+  const [newOpecCentroOperacao, setNewOpecCentroOperacao] = useState<string>("Matriz");
+  const [opecFilialFilter, setOpecFilialFilter] = useState<string>("TODAS");
+  const [isCreatingOpec, setIsCreatingOpec] = useState(false);
+  const [editingOpec, setEditingOpec] = useState<any>(null);
+  const [editOpecCodigo, setEditOpecCodigo] = useState("");
+  const [editOpecDescricao, setEditOpecDescricao] = useState("");
+  const [editOpecFilialValue, setEditOpecFilialValue] = useState<string>("Matriz");
+  const [isUpdatingOpec, setIsUpdatingOpec] = useState(false);
+  const [opecToDelete, setOpecToDelete] = useState<any>(null);
+  const [isDeletingOpec, setIsDeletingOpec] = useState(false);
+  const [isDeletingAllOpecsOpen, setIsDeletingAllOpecsOpen] = useState(false);
+  const [isDeletingAllOpecs, setIsDeletingAllOpecs] = useState(false);
+  const [isInitializingOpecs, setIsInitializingOpecs] = useState(false);
 
   // States para Exclusão de Veículos
   const [vehicleToDelete, setVehicleToDelete] = useState<any>(null);
@@ -181,6 +207,127 @@ export default function DashboardPage() {
       });
     } finally {
       setIsDeletingAllVehicles(false);
+    }
+  };
+
+  // Handlers para OPECs
+  const handleCreateOpec = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newOpecCodigo.trim()) return;
+
+    setIsCreatingOpec(true);
+    try {
+      await createOpec({
+        codigo: newOpecCodigo.trim(),
+        descricao: newOpecDescricao.trim() || undefined,
+        centroOperacao: newOpecCentroOperacao,
+        status: "ATIVO",
+      });
+      setNewOpecCodigo("");
+      setNewOpecDescricao("");
+      toast({
+        title: "OPEC Cadastrado!",
+        description: `Aparelho inserido com sucesso na Filial ${newOpecCentroOperacao}.`,
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Não foi possível cadastrar o OPEC.";
+      toast({
+        title: "Erro ao cadastrar",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingOpec(false);
+    }
+  };
+
+  const handleUpdateOpec = async () => {
+    if (!editingOpec) return;
+    setIsUpdatingOpec(true);
+    try {
+      await updateOpec({
+        id: editingOpec._id,
+        codigo: editOpecCodigo.trim() || editingOpec.codigo,
+        descricao: editOpecDescricao.trim() || undefined,
+        centroOperacao: editOpecFilialValue,
+      });
+      toast({
+        title: "OPEC Atualizado!",
+        description: `Dados do aparelho ${editOpecCodigo || editingOpec.codigo} salvos com sucesso.`,
+      });
+      setEditingOpec(null);
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Erro ao atualizar",
+        description: "Não foi possível atualizar os dados do OPEC.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingOpec(false);
+    }
+  };
+
+  const handleDeleteOpec = async () => {
+    if (!opecToDelete) return;
+    setIsDeletingOpec(true);
+    try {
+      await removeOpec({ id: opecToDelete._id });
+      toast({
+        title: "OPEC Excluído",
+        description: `O aparelho ${opecToDelete.codigo} foi removido com sucesso.`,
+      });
+      setOpecToDelete(null);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Erro ao excluir o OPEC.";
+      toast({
+        title: "Erro ao excluir",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeletingOpec(false);
+    }
+  };
+
+  const handleDeleteAllOpecs = async () => {
+    setIsDeletingAllOpecs(true);
+    try {
+      const count = await removeAllOpecs();
+      toast({
+        title: "Todos os OPECs Excluídos",
+        description: `${count} aparelho(s) foram removidos com sucesso.`,
+      });
+      setIsDeletingAllOpecsOpen(false);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Erro ao excluir todos os OPECs.";
+      toast({
+        title: "Erro ao excluir",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeletingAllOpecs(false);
+    }
+  };
+
+  const handleInitializeDefaultOpecs = async () => {
+    setIsInitializingOpecs(true);
+    try {
+      const res = await initializeDefaultOpecs();
+      toast({
+        title: "OPECs Inicializados!",
+        description: `${res.inserted} novo(s) OPEC(s) inseridos e ${res.updated} atualizados para a Matriz.`,
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Erro ao inicializar OPECs padrão.";
+      toast({
+        title: "Erro ao inicializar",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsInitializingOpecs(false);
     }
   };
 
@@ -238,8 +385,8 @@ export default function DashboardPage() {
 
     const kmRodados =
       checklistDetail.kmFinal !== undefined &&
-      checklistDetail.kmFinal !== null &&
-      checklistDetail.kmFinal >= checklistDetail.kmInicial
+        checklistDetail.kmFinal !== null &&
+        checklistDetail.kmFinal >= checklistDetail.kmInicial
         ? `+${(checklistDetail.kmFinal - checklistDetail.kmInicial).toLocaleString()} km`
         : "Em rota";
 
@@ -248,7 +395,7 @@ export default function DashboardPage() {
       { label: "Lado Esquerdo (Saída)", url: checklistDetail.photoUrls?.ladoEsquerdo },
       { label: "Lado Direito (Saída)", url: checklistDetail.photoUrls?.ladoDireito },
       { label: "Traseira (Saída)", url: checklistDetail.photoUrls?.tras },
-      { label: "Parte Interna (Saída)", url: checklistDetail.photoUrls?.interna },
+      { label: "Foto Painel (Saída)", url: checklistDetail.photoUrls?.interna },
       { label: "Carroceria (Saída)", url: checklistDetail.photoUrls?.carroceria },
     ];
 
@@ -257,7 +404,7 @@ export default function DashboardPage() {
       { label: "Lado Esquerdo (Retorno)", url: checklistDetail.photoFimUrls?.ladoEsquerdo },
       { label: "Lado Direito (Retorno)", url: checklistDetail.photoFimUrls?.ladoDireito },
       { label: "Traseira (Retorno)", url: checklistDetail.photoFimUrls?.tras },
-      { label: "Parte Interna (Retorno)", url: checklistDetail.photoFimUrls?.interna },
+      { label: "Foto Painel (Retorno)", url: checklistDetail.photoFimUrls?.interna },
       { label: "Carroceria (Retorno)", url: checklistDetail.photoFimUrls?.carroceria },
     ];
 
@@ -681,7 +828,7 @@ export default function DashboardPage() {
     try {
       setIsExporting(true);
       const dataToExport = consolidated ? (allChecklists || []) : (checklists || []);
-      
+
       if (!dataToExport || dataToExport.length === 0) {
         toast({
           title: "Nenhum dado encontrado",
@@ -804,7 +951,7 @@ export default function DashboardPage() {
     });
   };
 
-  // Contadores e Filtros por Filial
+  // Contadores e Filtros por Filial (Veículos)
   const unassignedVehiclesCount = useMemo(() => {
     return vehicles?.filter((v) => !v.centroOperacao).length || 0;
   }, [vehicles]);
@@ -815,6 +962,7 @@ export default function DashboardPage() {
       Leste: 0,
       Sul: 0,
       Matriz: 0,
+      "T.I": 0,
       SEM_FILIAL: 0,
     };
     vehicles?.forEach((v) => {
@@ -836,6 +984,40 @@ export default function DashboardPage() {
       (v) => (v.centroOperacao || "").toLowerCase() === filialFilter.toLowerCase()
     );
   }, [vehicles, filialFilter]);
+
+  // Contadores e Filtros por Filial (OPECs)
+  const unassignedOpecsCount = useMemo(() => {
+    return opecs?.filter((o) => !o.centroOperacao).length || 0;
+  }, [opecs]);
+
+  const opecFilialCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      TODAS: opecs?.length || 0,
+      Matriz: 0,
+      Leste: 0,
+      Sul: 0,
+      "T.I": 0,
+      SEM_FILIAL: 0,
+    };
+    opecs?.forEach((o) => {
+      if (!o.centroOperacao) {
+        counts.SEM_FILIAL = (counts.SEM_FILIAL || 0) + 1;
+      } else {
+        const c = o.centroOperacao;
+        counts[c] = (counts[c] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [opecs]);
+
+  const displayedOpecs = useMemo(() => {
+    if (!opecs) return [];
+    if (opecFilialFilter === "TODAS") return opecs;
+    if (opecFilialFilter === "SEM_FILIAL") return opecs.filter((o) => !o.centroOperacao);
+    return opecs.filter(
+      (o) => (o.centroOperacao || "").toLowerCase() === opecFilialFilter.toLowerCase()
+    );
+  }, [opecs, opecFilialFilter]);
 
   const handleCreateVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1122,12 +1304,15 @@ export default function DashboardPage() {
 
       {/* Tabs de Conteúdo */}
       <Tabs defaultValue="checklists" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 max-w-md bg-muted/60 p-1 rounded-xl">
+        <TabsList className="grid w-full grid-cols-4 max-w-2xl bg-muted/60 p-1 rounded-xl">
           <TabsTrigger value="checklists" className="font-bold">
             Checklists
           </TabsTrigger>
           <TabsTrigger value="vehicles" className="font-bold">
             Veículos
+          </TabsTrigger>
+          <TabsTrigger value="opecs" className="font-bold">
+            OPECs (Celulares)
           </TabsTrigger>
           <TabsTrigger value="users" className="font-bold">
             Equipe / Perfis
@@ -1282,32 +1467,32 @@ export default function DashboardPage() {
                                 Óleo: {c.nivelOleo} | Água: {c.nivelAgua}
                               </span>
                             </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setSelectedChecklistId(c._id)}
-                                className="flex items-center gap-1"
-                              >
-                                <EyeIcon className="w-4 h-4" />
-                                Ver Detalhes
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200 dark:border-red-900/40"
-                                onClick={() => setChecklistToDelete(c)}
-                                title="Excluir checklist"
-                              >
-                                <Trash2Icon className="w-4 h-4 mr-1" />
-                                Excluir
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    }))}
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setSelectedChecklistId(c._id)}
+                                  className="flex items-center gap-1"
+                                >
+                                  <EyeIcon className="w-4 h-4" />
+                                  Ver Detalhes
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200 dark:border-red-900/40"
+                                  onClick={() => setChecklistToDelete(c)}
+                                  title="Excluir checklist"
+                                >
+                                  <Trash2Icon className="w-4 h-4 mr-1" />
+                                  Excluir
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }))}
                   </TableBody>
                 </Table>
               </div>
@@ -1371,6 +1556,7 @@ export default function DashboardPage() {
                         <SelectItem value="Sul">Sul</SelectItem>
                         <SelectItem value="Leste">Leste</SelectItem>
                         <SelectItem value="Matriz">Matriz</SelectItem>
+                        <SelectItem value="T.I">T.I</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1441,6 +1627,7 @@ export default function DashboardPage() {
                     { id: "Leste", label: "Leste", count: filialCounts.Leste },
                     { id: "Sul", label: "Sul", count: filialCounts.Sul },
                     { id: "Matriz", label: "Matriz", count: filialCounts.Matriz },
+                    { id: "T.I", label: "T.I", count: filialCounts["T.I"] || 0 },
                     ...(filialCounts.SEM_FILIAL > 0
                       ? [{ id: "SEM_FILIAL", label: "Sem Filial", count: filialCounts.SEM_FILIAL }]
                       : []),
@@ -1510,6 +1697,8 @@ export default function DashboardPage() {
                             filialBadgeColor = "border-blue-500/40 text-blue-700 dark:text-blue-400 bg-blue-500/10";
                           } else if (filialName === "Matriz") {
                             filialBadgeColor = "border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10";
+                          } else if (filialName === "T.I") {
+                            filialBadgeColor = "border-purple-500/40 text-purple-700 dark:text-purple-400 bg-purple-500/10";
                           }
 
                           return (
@@ -1631,7 +1820,268 @@ export default function DashboardPage() {
           </div>
         </TabsContent>
 
-        {/* TAB 3: GERENCIAR EQUIPE / PERFIS */}
+        {/* TAB 3: GERENCIAR OPECS (CELULARES) */}
+        <TabsContent value="opecs" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Formulário de Novo OPEC */}
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <SmartphoneIcon className="w-5 h-5 text-primary" />
+                  Cadastrar Aparelho OPEC
+                </CardTitle>
+                <CardDescription>Adicione celulares corporativos e vincule à filial correspondente.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleCreateOpec} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="opec-codigo">Identificador / Código</Label>
+                    <Input
+                      id="opec-codigo"
+                      placeholder="Ex: OPEC 51 ou OPEC Apoio 2"
+                      value={newOpecCodigo}
+                      onChange={(e) => setNewOpecCodigo(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="opec-descricao">Modelo / Descrição (Opcional)</Label>
+                    <Input
+                      id="opec-descricao"
+                      placeholder="Ex: Samsung Galaxy A14, Motorola G54"
+                      value={newOpecDescricao}
+                      onChange={(e) => setNewOpecDescricao(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="opec-centroOperacao">Filial / Centro de Operação</Label>
+                    <Select value={newOpecCentroOperacao} onValueChange={(val) => val && setNewOpecCentroOperacao(val)}>
+                      <SelectTrigger id="opec-centroOperacao">
+                        <SelectValue placeholder="Selecione a filial" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Matriz">Matriz</SelectItem>
+                        <SelectItem value="Sul">Sul</SelectItem>
+                        <SelectItem value="Leste">Leste</SelectItem>
+                        <SelectItem value="T.I">T.I</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={isCreatingOpec}
+                    className="w-full bg-primary text-black font-bold h-11 flex items-center justify-center gap-1.5"
+                  >
+                    <PlusCircleIcon className="w-4 h-4" />
+                    {isCreatingOpec ? "Cadastrando..." : "Salvar OPEC"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Listagem de OPECs */}
+            <Card className="md:col-span-2 shadow-sm">
+              <CardHeader className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <span>OPECs Cadastrados</span>
+                      <Badge variant="outline" className="font-mono text-xs">
+                        {displayedOpecs.length} de {opecs?.length || 0}
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription>
+                      Gerencie os celulares corporativos por filial para a operação.
+                    </CardDescription>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs font-bold border-primary/30 text-primary hover:bg-primary/10 flex items-center gap-1.5"
+                      onClick={handleInitializeDefaultOpecs}
+                      disabled={isInitializingOpecs}
+                      title="Carregar ou restaurar OPEC 01 a 50 vinculados à Matriz"
+                    >
+                      <SmartphoneIcon className="w-3.5 h-3.5" />
+                      {isInitializingOpecs ? "Carregando..." : "Carregar Padrão (Matriz)"}
+                    </Button>
+                    {opecs && opecs.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200 dark:border-red-900/40 font-bold flex items-center gap-1.5"
+                        onClick={() => setIsDeletingAllOpecsOpen(true)}
+                      >
+                        <Trash2Icon className="w-4 h-4" />
+                        Apagar Todos ({opecs.length})
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Filtro Rápido por Filial */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  {[
+                    { id: "TODAS", label: "Todas", count: opecFilialCounts.TODAS },
+                    { id: "Matriz", label: "Matriz", count: opecFilialCounts.Matriz },
+                    { id: "Leste", label: "Leste", count: opecFilialCounts.Leste },
+                    { id: "Sul", label: "Sul", count: opecFilialCounts.Sul },
+                    { id: "T.I", label: "T.I", count: opecFilialCounts["T.I"] || 0 },
+                    ...(opecFilialCounts.SEM_FILIAL > 0
+                      ? [{ id: "SEM_FILIAL", label: "Sem Filial", count: opecFilialCounts.SEM_FILIAL }]
+                      : []),
+                  ].map((tab) => (
+                    <Button
+                      key={tab.id}
+                      type="button"
+                      variant={opecFilialFilter === tab.id ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setOpecFilialFilter(tab.id)}
+                      className={cn(
+                        "h-8 text-xs font-semibold flex items-center gap-1.5",
+                        opecFilialFilter === tab.id
+                          ? "bg-primary text-black font-bold hover:bg-primary/90"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <span>{tab.label}</span>
+                      <span
+                        className={cn(
+                          "text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold",
+                          opecFilialFilter === tab.id
+                            ? "bg-black/20 text-black"
+                            : "bg-muted text-foreground"
+                        )}
+                      >
+                        {tab.count}
+                      </span>
+                    </Button>
+                  ))}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/50">
+                        <TableHead>Código / Identificador</TableHead>
+                        <TableHead>Modelo / Descrição</TableHead>
+                        <TableHead>Filial / Centro</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {displayedOpecs.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                            {opecFilialFilter === "TODAS"
+                              ? "Nenhum OPEC cadastrado no sistema."
+                              : `Nenhum OPEC cadastrado para o filtro "${opecFilialFilter}".`}
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        displayedOpecs.map((o) => {
+                          const filialName = o.centroOperacao;
+                          let filialBadgeColor = "border-muted-foreground/30 text-muted-foreground";
+                          if (filialName === "Leste") {
+                            filialBadgeColor = "border-amber-500/40 text-amber-700 dark:text-amber-400 bg-amber-500/10";
+                          } else if (filialName === "Sul") {
+                            filialBadgeColor = "border-blue-500/40 text-blue-700 dark:text-blue-400 bg-blue-500/10";
+                          } else if (filialName === "Matriz") {
+                            filialBadgeColor = "border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10";
+                          } else if (filialName === "T.I") {
+                            filialBadgeColor = "border-purple-500/40 text-purple-700 dark:text-purple-400 bg-purple-500/10";
+                          }
+
+                          return (
+                            <TableRow key={o._id}>
+                              <TableCell className="font-bold">
+                                <Badge variant="outline" className="text-xs font-bold flex items-center gap-1 w-fit bg-primary/10 border-primary/30 text-foreground">
+                                  <SmartphoneIcon className="w-3 h-3 text-primary shrink-0" />
+                                  {o.codigo}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-xs text-muted-foreground font-medium">
+                                {o.descricao || "Celular Corporativo"}
+                              </TableCell>
+                              <TableCell>
+                                {filialName ? (
+                                  <Badge variant="outline" className={cn("font-semibold text-xs", filialBadgeColor)}>
+                                    <MapPinIcon className="w-3 h-3 mr-1" />
+                                    {filialName}
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="destructive" className="text-[10px]">
+                                    Sem Filial
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {o.status === "ATIVO" ? (
+                                  <Badge className="bg-green-600 text-white">ATIVO</Badge>
+                                ) : (
+                                  <Badge variant="destructive">MANUTENÇÃO</Badge>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex justify-end gap-1.5">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8 text-xs font-semibold"
+                                    onClick={() => {
+                                      setEditingOpec(o);
+                                      setEditOpecCodigo(o.codigo);
+                                      setEditOpecDescricao(o.descricao || "");
+                                      setEditOpecFilialValue(o.centroOperacao || "Matriz");
+                                    }}
+                                    title="Editar filial e descrição do aparelho"
+                                  >
+                                    <MapPinIcon className="w-3.5 h-3.5 mr-1 text-primary" />
+                                    Filial / Modelo
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-8 text-xs"
+                                    onClick={() =>
+                                      updateOpecStatus({
+                                        id: o._id,
+                                        status: o.status === "ATIVO" ? "MANUTENCAO" : "ATIVO",
+                                      })
+                                    }
+                                  >
+                                    {o.status === "ATIVO" ? "Manutenção" : "Ativar"}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200 dark:border-red-900/40 px-2"
+                                    onClick={() => setOpecToDelete(o)}
+                                    title="Excluir OPEC"
+                                  >
+                                    <Trash2Icon className="w-3.5 h-3.5" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* TAB 4: GERENCIAR EQUIPE / PERFIS */}
         <TabsContent value="users" className="space-y-4">
           <Card className="shadow-sm">
             <CardHeader>
@@ -1737,11 +2187,10 @@ export default function DashboardPage() {
                 )}
                 {checklistDetail && (
                   <Badge
-                    className={`text-xs font-bold ${
-                      checklistDetail.status === "FINALIZADO"
-                        ? "bg-green-600/20 text-green-700 dark:text-green-400 border-green-600/30"
-                        : "bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/30 animate-pulse"
-                    }`}
+                    className={`text-xs font-bold ${checklistDetail.status === "FINALIZADO"
+                      ? "bg-green-600/20 text-green-700 dark:text-green-400 border-green-600/30"
+                      : "bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/30 animate-pulse"
+                      }`}
                   >
                     {checklistDetail.status === "FINALIZADO" ? "TURNO FINALIZADO" : "EM ROTA / EM ANDAMENTO"}
                   </Badge>
@@ -1822,8 +2271,8 @@ export default function DashboardPage() {
                     </span>
                     <p className="text-base sm:text-lg font-bold font-mono text-green-700 dark:text-green-400 mt-1">
                       {checklistDetail.kmFinal !== undefined &&
-                      checklistDetail.kmFinal !== null &&
-                      checklistDetail.kmFinal >= checklistDetail.kmInicial
+                        checklistDetail.kmFinal !== null &&
+                        checklistDetail.kmFinal >= checklistDetail.kmInicial
                         ? `+${(checklistDetail.kmFinal - checklistDetail.kmInicial).toLocaleString()} km`
                         : "Em rota"}
                     </p>
@@ -1906,9 +2355,8 @@ export default function DashboardPage() {
                         </div>
                         <Badge
                           variant={isPositive ? "outline" : "destructive"}
-                          className={`text-xs font-semibold shrink-0 uppercase ${
-                            isPositive ? "border-green-600/30 text-green-700 bg-green-500/10" : ""
-                          }`}
+                          className={`text-xs font-semibold shrink-0 uppercase ${isPositive ? "border-green-600/30 text-green-700 bg-green-500/10" : ""
+                            }`}
                         >
                           {displayStatus}
                         </Badge>
@@ -1930,7 +2378,7 @@ export default function DashboardPage() {
                     { label: "Lado Esquerdo (Saída)", url: checklistDetail.photoUrls?.ladoEsquerdo },
                     { label: "Lado Direito (Saída)", url: checklistDetail.photoUrls?.ladoDireito },
                     { label: "Traseira (Saída)", url: checklistDetail.photoUrls?.tras },
-                    { label: "Parte Interna (Saída)", url: checklistDetail.photoUrls?.interna },
+                    { label: "Foto Painel (Saída)", url: checklistDetail.photoUrls?.interna },
                     { label: "Carroceria (Saída)", url: checklistDetail.photoUrls?.carroceria },
                   ].map((foto) => (
                     <div
@@ -1990,7 +2438,7 @@ export default function DashboardPage() {
                     { label: "Lado Esquerdo (Retorno)", url: checklistDetail.photoFimUrls?.ladoEsquerdo },
                     { label: "Lado Direito (Retorno)", url: checklistDetail.photoFimUrls?.ladoDireito },
                     { label: "Traseira (Retorno)", url: checklistDetail.photoFimUrls?.tras },
-                    { label: "Parte Interna (Retorno)", url: checklistDetail.photoFimUrls?.interna },
+                    { label: "Foto Painel (Retorno)", url: checklistDetail.photoFimUrls?.interna },
                     { label: "Carroceria (Retorno)", url: checklistDetail.photoFimUrls?.carroceria },
                   ].map((foto) => (
                     <div
@@ -2167,6 +2615,7 @@ export default function DashboardPage() {
                   <SelectItem value="Sul">Sul</SelectItem>
                   <SelectItem value="Leste">Leste</SelectItem>
                   <SelectItem value="Matriz">Matriz</SelectItem>
+                  <SelectItem value="T.I">T.I</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -2188,6 +2637,157 @@ export default function DashboardPage() {
                 {isUpdatingFilial ? "Salvando..." : "Salvar Alterações"}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL DE ALTERAÇÃO DE FILIAL E DESCRIÇÃO DO OPEC */}
+      <Dialog
+        open={!!editingOpec}
+        onOpenChange={(open) => !open && !isUpdatingOpec && setEditingOpec(null)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <SmartphoneIcon className="w-5 h-5 text-primary" />
+              Editar Aparelho OPEC
+            </DialogTitle>
+            <DialogDescription>
+              Defina a filial e a descrição do aparelho{" "}
+              <strong className="font-mono">{editingOpec?.codigo}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-opec-codigo">Código / Identificador</Label>
+              <Input
+                id="edit-opec-codigo"
+                placeholder="Ex: OPEC 01"
+                value={editOpecCodigo}
+                onChange={(e) => setEditOpecCodigo(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-opec-descricao">Modelo / Descrição</Label>
+              <Input
+                id="edit-opec-descricao"
+                placeholder="Ex: Samsung Galaxy A14, Motorola G54"
+                value={editOpecDescricao}
+                onChange={(e) => setEditOpecDescricao(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-opec-filial">Filial / Centro de Operação</Label>
+              <Select value={editOpecFilialValue} onValueChange={(val) => val && setEditOpecFilialValue(val)}>
+                <SelectTrigger id="edit-opec-filial">
+                  <SelectValue placeholder="Selecione a filial" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Matriz">Matriz</SelectItem>
+                  <SelectItem value="Sul">Sul</SelectItem>
+                  <SelectItem value="Leste">Leste</SelectItem>
+                  <SelectItem value="T.I">T.I</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isUpdatingOpec}
+                onClick={() => setEditingOpec(null)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                className="bg-primary text-black font-bold"
+                disabled={isUpdatingOpec}
+                onClick={handleUpdateOpec}
+              >
+                {isUpdatingOpec ? "Salvando..." : "Salvar Alterações"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO DE OPEC INDIVIDUAL */}
+      <Dialog
+        open={!!opecToDelete}
+        onOpenChange={(open) => !open && !isDeletingOpec && setOpecToDelete(null)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive font-bold">
+              <Trash2Icon className="w-5 h-5 text-red-600" />
+              Excluir Aparelho OPEC
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-foreground/85 text-sm">
+              Tem certeza que deseja excluir o aparelho{" "}
+              <strong className="text-foreground font-semibold">{opecToDelete?.codigo}</strong> (
+              <span className="text-muted-foreground">{opecToDelete?.descricao || "Sem descrição"}</span>) da filial{" "}
+              <strong>{opecToDelete?.centroOperacao || "Sem Filial"}</strong>?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isDeletingOpec}
+              onClick={() => setOpecToDelete(null)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isDeletingOpec}
+              onClick={handleDeleteOpec}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold"
+            >
+              {isDeletingOpec ? "Excluindo..." : "Confirmar Exclusão"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO DE TODOS OS OPECS */}
+      <Dialog
+        open={isDeletingAllOpecsOpen}
+        onOpenChange={(open) => !open && !isDeletingAllOpecs && setIsDeletingAllOpecsOpen(false)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive font-bold">
+              <Trash2Icon className="w-5 h-5 text-red-600" />
+              Apagar Todos os OPECs
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-foreground/85 text-sm">
+              Tem certeza que deseja apagar <strong className="text-foreground font-semibold">TODOS os {opecs?.length || 0} aparelhos OPEC</strong> cadastrados?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="text-xs text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg leading-relaxed">
+            Atenção: Esta ação removerá todos os celulares corporativos cadastrados. Você poderá re-inicializar a lista padrão da Matriz a qualquer momento.
+          </div>
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isDeletingAllOpecs}
+              onClick={() => setIsDeletingAllOpecsOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isDeletingAllOpecs}
+              onClick={handleDeleteAllOpecs}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold"
+            >
+              {isDeletingAllOpecs ? "Excluindo..." : "Sim, Apagar Todos os OPECs"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

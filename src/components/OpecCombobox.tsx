@@ -5,31 +5,32 @@ import { Search, ChevronDown, Check, Smartphone, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-// Lista padrão de aparelhos corporativos OPEC da operação (OPEC 01 a 50 + Reserva)
-const DEFAULT_OPEC_LIST = [
-  ...Array.from({ length: 50 }, (_, i) => {
-    const num = String(i + 1).padStart(2, "0");
-    return `OPEC ${num}`;
-  }),
-  "OPEC Reserva",
-  "OPEC Apoio",
-  "Celular Próprio / Particular",
-];
+export interface OpecItem {
+  _id?: string;
+  codigo: string;
+  descricao?: string;
+  centroOperacao?: string;
+  status?: string;
+}
 
 interface OpecComboboxProps {
   value: string;
   onChange: (value: string) => void;
+  opecs?: OpecItem[];
   placeholder?: string;
   error?: boolean;
   disabled?: boolean;
+  filialName?: string;
 }
 
 export function OpecCombobox({
   value,
   onChange,
+  opecs = [],
   placeholder = "Selecione ou busque o OPEC (Celular)...",
   error = false,
   disabled = false,
+  filialName,
 }: OpecComboboxProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
@@ -58,23 +59,32 @@ export function OpecCombobox({
     }
   }, [isOpen]);
 
+  const selectedOpec = React.useMemo(() => {
+    if (!value) return null;
+    return opecs.find(
+      (o) => o.codigo.toUpperCase() === value.trim().toUpperCase()
+    );
+  }, [value, opecs]);
+
   const filteredOpecs = React.useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return DEFAULT_OPEC_LIST;
+    if (!q) return opecs;
 
     // Se o usuário digitou apenas um número (ex: "7"), busca tanto "07" quanto "7"
     const isNum = /^\d+$/.test(q);
     const paddedNum = isNum ? q.padStart(2, "0") : q;
 
-    return DEFAULT_OPEC_LIST.filter(
+    return opecs.filter(
       (item) =>
-        item.toLowerCase().includes(q) ||
-        (isNum && item.toLowerCase().includes(`opec ${paddedNum}`))
+        item.codigo.toLowerCase().includes(q) ||
+        (item.descricao && item.descricao.toLowerCase().includes(q)) ||
+        (isNum && item.codigo.toLowerCase().includes(`opec ${paddedNum}`)) ||
+        (isNum && item.codigo.toLowerCase().includes(`opec ${q}`))
     );
-  }, [search]);
+  }, [search, opecs]);
 
-  const handleSelect = (selectedOpec: string) => {
-    onChange(selectedOpec.trim());
+  const handleSelect = (selectedOpecCode: string) => {
+    onChange(selectedOpecCode.trim());
     setIsOpen(false);
   };
 
@@ -124,6 +134,11 @@ export function OpecCombobox({
               <Badge className="bg-primary/20 hover:bg-primary/20 text-foreground font-bold text-xs border border-primary/40 px-2.5 py-0.5 shrink-0">
                 {value}
               </Badge>
+              {selectedOpec?.descricao && (
+                <span className="text-muted-foreground text-xs truncate">
+                  {selectedOpec.descricao}
+                </span>
+              )}
             </div>
           ) : (
             <span
@@ -171,7 +186,7 @@ export function OpecCombobox({
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Digite o número (ex: 05, 12) ou busque..."
+                placeholder={filialName ? `Buscar OPEC ou número (${filialName})...` : "Digite o número (ex: 05, 12) ou busque..."}
                 className="w-full bg-background border border-input rounded-md pl-8 pr-3 py-1.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground"
                 onKeyDown={(e) => {
                   if (e.key === "Escape") {
@@ -180,7 +195,7 @@ export function OpecCombobox({
                   if (e.key === "Enter") {
                     e.preventDefault();
                     if (filteredOpecs.length > 0) {
-                      handleSelect(filteredOpecs[0]);
+                      handleSelect(filteredOpecs[0].codigo);
                     } else if (search.trim()) {
                       const customOpec = /^\d+$/.test(search.trim())
                         ? `OPEC ${search.trim().padStart(2, "0")}`
@@ -198,7 +213,9 @@ export function OpecCombobox({
             {filteredOpecs.length === 0 ? (
               <div className="py-4 px-3 text-center space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  Nenhum OPEC pré-cadastrado encontrado para &quot;{search}&quot;.
+                  {opecs.length === 0 && filialName
+                    ? `Nenhum OPEC cadastrado na filial ${filialName}.`
+                    : `Nenhum OPEC encontrado para "${search}".`}
                 </p>
                 {search.trim() && (
                   <button
@@ -224,7 +241,7 @@ export function OpecCombobox({
               <>
                 {search.trim() &&
                   !filteredOpecs.some(
-                    (o) => o.toLowerCase() === search.trim().toLowerCase()
+                    (o) => o.codigo.toLowerCase() === search.trim().toLowerCase()
                   ) && (
                     <div
                       onClick={() => {
@@ -250,12 +267,12 @@ export function OpecCombobox({
                 <div className="grid grid-cols-2 gap-1 sm:grid-cols-3">
                   {filteredOpecs.map((opecItem) => {
                     const isSelected =
-                      value.trim().toUpperCase() === opecItem.toUpperCase();
+                      value.trim().toUpperCase() === opecItem.codigo.toUpperCase();
 
                     return (
                       <div
-                        key={opecItem}
-                        onClick={() => handleSelect(opecItem)}
+                        key={opecItem._id || opecItem.codigo}
+                        onClick={() => handleSelect(opecItem.codigo)}
                         className={cn(
                           "flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs cursor-pointer transition-all border border-transparent",
                           isSelected
@@ -270,7 +287,7 @@ export function OpecCombobox({
                               isSelected ? "text-primary" : "text-muted-foreground"
                             )}
                           />
-                          <span className="font-medium truncate">{opecItem}</span>
+                          <span className="font-medium truncate">{opecItem.codigo}</span>
                         </div>
 
                         {isSelected && (
@@ -286,7 +303,9 @@ export function OpecCombobox({
 
           {/* Footer Informativo */}
           <div className="px-3 py-1.5 bg-muted/30 border-t text-[11px] text-muted-foreground flex justify-between items-center">
-            <span>Celular corporativo para ordens de serviço</span>
+            <span>
+              {filteredOpecs.length} OPEC(s) {filialName ? `na filial ${filialName}` : "disponíveis"}
+            </span>
             <span className="text-[10px] text-muted-foreground/80 font-medium">
               Eletromidia OPEC
             </span>
@@ -296,3 +315,4 @@ export function OpecCombobox({
     </div>
   );
 }
+
