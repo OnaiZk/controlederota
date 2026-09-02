@@ -433,3 +433,85 @@ export const remove = mutation({
     return args.id;
   },
 });
+
+export const update = mutation({
+  args: {
+    id: v.id("checklists"),
+    data: v.optional(v.string()),
+    hora: v.optional(v.string()),
+    horaFinal: v.optional(v.string()),
+    status: v.optional(v.union(v.literal("EM_ANDAMENTO"), v.literal("FINALIZADO"))),
+    centroOperacao: v.optional(v.string()),
+    opec: v.optional(v.string()),
+    kmInicial: v.optional(v.number()),
+    kmFinal: v.optional(v.number()),
+    nivelCombustivel: v.optional(v.string()),
+    nivelOleo: v.optional(v.string()),
+    nivelAgua: v.optional(v.string()),
+    observacoesFim: v.optional(v.string()),
+    estepe: v.optional(v.union(v.string(), v.boolean())),
+    triangulo: v.optional(v.union(v.string(), v.boolean())),
+    chaveRoda: v.optional(v.union(v.string(), v.boolean())),
+    faroisLanternas: v.optional(v.union(v.string(), v.boolean())),
+    macaco: v.optional(v.union(v.string(), v.boolean())),
+    buzina: v.optional(v.union(v.string(), v.boolean())),
+    documentacao: v.optional(v.union(v.string(), v.boolean())),
+    cartaoAbastecimento: v.optional(v.union(v.string(), v.boolean())),
+    updateVehicleKm: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const checklist = await ctx.db.get(args.id);
+    if (!checklist) {
+      throw new Error("Checklist não encontrado.");
+    }
+
+    const patchData: any = {};
+    if (args.data !== undefined) patchData.data = args.data;
+    if (args.hora !== undefined) patchData.hora = args.hora;
+    if (args.horaFinal !== undefined) patchData.horaFinal = args.horaFinal;
+    if (args.status !== undefined) patchData.status = args.status;
+    if (args.centroOperacao !== undefined) patchData.centroOperacao = args.centroOperacao;
+    if (args.opec !== undefined) patchData.opec = args.opec;
+    if (args.kmInicial !== undefined) patchData.kmInicial = args.kmInicial;
+    if (args.kmFinal !== undefined) patchData.kmFinal = args.kmFinal;
+    if (args.nivelCombustivel !== undefined) patchData.nivelCombustivel = args.nivelCombustivel;
+    if (args.nivelOleo !== undefined) patchData.nivelOleo = args.nivelOleo;
+    if (args.nivelAgua !== undefined) patchData.nivelAgua = args.nivelAgua;
+    if (args.observacoesFim !== undefined) patchData.observacoesFim = args.observacoesFim;
+    if (args.estepe !== undefined) patchData.estepe = args.estepe;
+    if (args.triangulo !== undefined) patchData.triangulo = args.triangulo;
+    if (args.chaveRoda !== undefined) patchData.chaveRoda = args.chaveRoda;
+    if (args.faroisLanternas !== undefined) patchData.faroisLanternas = args.faroisLanternas;
+    if (args.macaco !== undefined) patchData.macaco = args.macaco;
+    if (args.buzina !== undefined) patchData.buzina = args.buzina;
+    if (args.documentacao !== undefined) patchData.documentacao = args.documentacao;
+    if (args.cartaoAbastecimento !== undefined) patchData.cartaoAbastecimento = args.cartaoAbastecimento;
+
+    // Se kmFinal for alterado e nenhum status explícito tiver sido fornecido
+    if (args.kmFinal !== undefined && args.status === undefined) {
+      if (args.kmFinal > 0) {
+        patchData.status = "FINALIZADO";
+      }
+    }
+
+    await ctx.db.patch(args.id, patchData);
+
+    // Se solicitado para sincronizar o KM atual do veículo
+    if (args.updateVehicleKm) {
+      const targetKm =
+        args.kmFinal !== undefined && args.kmFinal !== null
+          ? args.kmFinal
+          : args.kmInicial !== undefined && args.kmInicial !== null
+          ? args.kmInicial
+          : checklist.kmFinal || checklist.kmInicial;
+
+      if (targetKm !== undefined && targetKm !== null && targetKm >= 0) {
+        await ctx.db.patch(checklist.vehicleId, {
+          kmAtual: targetKm,
+        });
+      }
+    }
+
+    return args.id;
+  },
+});

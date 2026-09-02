@@ -85,6 +85,7 @@ import {
   SearchIcon,
   SparklesIcon,
   PenLineIcon,
+  SaveIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { exportConsolidatedExcel } from "@/lib/exportExcel";
@@ -139,6 +140,7 @@ export default function DashboardPage() {
   const updateRole = useMutation(api.users.updateRole);
   const removeUser = useMutation(api.users.remove);
   const removeChecklist = useMutation(api.checklists.remove);
+  const updateChecklist = useMutation(api.checklists.update);
   const removeVehicle = useMutation(api.vehicles.remove);
   const removeAllVehicles = useMutation(api.vehicles.removeAll);
 
@@ -620,6 +622,145 @@ export default function DashboardPage() {
       });
     } finally {
       setIsDeletingChecklist(false);
+    }
+  };
+
+  // States para Edição de Checklist
+  const [editingChecklist, setEditingChecklist] = useState<any>(null);
+  const [editChecklistKmInicial, setEditChecklistKmInicial] = useState("");
+  const [editChecklistKmFinal, setEditChecklistKmFinal] = useState("");
+  const [editChecklistData, setEditChecklistData] = useState("");
+  const [editChecklistHora, setEditChecklistHora] = useState("");
+  const [editChecklistHoraFinal, setEditChecklistHoraFinal] = useState("");
+  const [editChecklistStatus, setEditChecklistStatus] = useState<"EM_ANDAMENTO" | "FINALIZADO">("FINALIZADO");
+  const [editChecklistCentroOperacao, setEditChecklistCentroOperacao] = useState("Matriz");
+  const [editChecklistOpec, setEditChecklistOpec] = useState("");
+  const [editChecklistNivelCombustivel, setEditChecklistNivelCombustivel] = useState("1/2");
+  const [editChecklistNivelOleo, setEditChecklistNivelOleo] = useState("Bom");
+  const [editChecklistNivelAgua, setEditChecklistNivelAgua] = useState("Bom");
+  const [editChecklistObservacoesFim, setEditChecklistObservacoesFim] = useState("");
+  const [editChecklistSyncVehicleKm, setEditChecklistSyncVehicleKm] = useState(true);
+  const [isUpdatingChecklist, setIsUpdatingChecklist] = useState(false);
+
+  // Itens de Verificação para Edição
+  const [editChecklistEstepe, setEditChecklistEstepe] = useState<string>("Bom");
+  const [editChecklistTriangulo, setEditChecklistTriangulo] = useState<string>("Sim");
+  const [editChecklistChaveRoda, setEditChecklistChaveRoda] = useState<string>("Sim");
+  const [editChecklistFaroisLanternas, setEditChecklistFaroisLanternas] = useState<string>("Bom");
+  const [editChecklistMacaco, setEditChecklistMacaco] = useState<string>("Sim");
+  const [editChecklistBuzina, setEditChecklistBuzina] = useState<string>("Sim");
+  const [editChecklistDocumentacao, setEditChecklistDocumentacao] = useState<string>("Sim");
+  const [editChecklistCartaoAbastecimento, setEditChecklistCartaoAbastecimento] = useState<string>("Sim");
+
+  const handleOpenEditChecklist = (c: any) => {
+    if (!c) return;
+    setEditingChecklist(c);
+    setEditChecklistKmInicial(c.kmInicial !== undefined && c.kmInicial !== null ? c.kmInicial.toString() : "0");
+    setEditChecklistKmFinal(c.kmFinal !== undefined && c.kmFinal !== null ? c.kmFinal.toString() : "");
+    setEditChecklistData(c.data || todayStr);
+    setEditChecklistHora(c.hora || "");
+    setEditChecklistHoraFinal(c.horaFinal || "");
+    setEditChecklistStatus(c.status === "EM_ANDAMENTO" ? "EM_ANDAMENTO" : "FINALIZADO");
+    setEditChecklistCentroOperacao(c.centroOperacao || "Matriz");
+    setEditChecklistOpec(c.opec || "");
+    setEditChecklistNivelCombustivel(c.nivelCombustivel || "1/2");
+    setEditChecklistNivelOleo(c.nivelOleo || "Bom");
+    setEditChecklistNivelAgua(c.nivelAgua || "Bom");
+    setEditChecklistObservacoesFim(c.observacoesFim || "");
+    setEditChecklistSyncVehicleKm(true);
+
+    const formatBoolStr = (val: any, defaultTrue: string = "Sim", defaultFalse: string = "Não") => {
+      if (val === true || val === "Sim" || val === "SIM") return defaultTrue;
+      if (val === false || val === "Não" || val === "NAO" || val === "Nao") return defaultFalse;
+      if (val === "Bom" || val === "BOM") return "Bom";
+      if (val === "Ruim" || val === "RUIM") return "Ruim";
+      return typeof val === "string" && val.trim() ? val : defaultTrue;
+    };
+
+    setEditChecklistEstepe(formatBoolStr(c.estepe, "Bom", "Ruim"));
+    setEditChecklistTriangulo(formatBoolStr(c.triangulo, "Sim", "Não"));
+    setEditChecklistChaveRoda(formatBoolStr(c.chaveRoda, "Sim", "Não"));
+    setEditChecklistFaroisLanternas(formatBoolStr(c.faroisLanternas, "Bom", "Ruim"));
+    setEditChecklistMacaco(formatBoolStr(c.macaco, "Sim", "Não"));
+    setEditChecklistBuzina(formatBoolStr(c.buzina, "Sim", "Não"));
+    setEditChecklistDocumentacao(formatBoolStr(c.documentacao, "Sim", "Não"));
+    setEditChecklistCartaoAbastecimento(formatBoolStr(c.cartaoAbastecimento, "Sim", "Não"));
+  };
+
+  const handleSaveEditChecklist = async () => {
+    if (!editingChecklist) return;
+
+    const kmInicialNum = editChecklistKmInicial.trim() !== "" ? parseInt(editChecklistKmInicial.trim(), 10) : 0;
+    const kmFinalNum = editChecklistKmFinal.trim() !== "" ? parseInt(editChecklistKmFinal.trim(), 10) : undefined;
+
+    if (isNaN(kmInicialNum) || kmInicialNum < 0) {
+      toast({
+        title: "KM Inicial Inválido",
+        description: "Por favor, informe uma quilometragem inicial válida (número positivo).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (kmFinalNum !== undefined && isNaN(kmFinalNum)) {
+      toast({
+        title: "KM Final Inválido",
+        description: "Por favor, informe uma quilometragem final válida.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (kmFinalNum !== undefined && kmFinalNum < kmInicialNum) {
+      toast({
+        title: "KM Final Menor que Inicial",
+        description: `O KM final (${kmFinalNum.toLocaleString()} km) não pode ser menor que o KM inicial (${kmInicialNum.toLocaleString()} km).`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUpdatingChecklist(true);
+    try {
+      await updateChecklist({
+        id: editingChecklist._id,
+        kmInicial: kmInicialNum,
+        kmFinal: kmFinalNum,
+        data: editChecklistData.trim() || undefined,
+        hora: editChecklistHora.trim() || undefined,
+        horaFinal: editChecklistHoraFinal.trim() || undefined,
+        status: editChecklistStatus,
+        centroOperacao: editChecklistCentroOperacao,
+        opec: editChecklistOpec.trim() || undefined,
+        nivelCombustivel: editChecklistNivelCombustivel,
+        nivelOleo: editChecklistNivelOleo,
+        nivelAgua: editChecklistNivelAgua,
+        observacoesFim: editChecklistObservacoesFim.trim() || undefined,
+        estepe: editChecklistEstepe,
+        triangulo: editChecklistTriangulo,
+        chaveRoda: editChecklistChaveRoda,
+        faroisLanternas: editChecklistFaroisLanternas,
+        macaco: editChecklistMacaco,
+        buzina: editChecklistBuzina,
+        documentacao: editChecklistDocumentacao,
+        cartaoAbastecimento: editChecklistCartaoAbastecimento,
+        updateVehicleKm: editChecklistSyncVehicleKm,
+      });
+
+      toast({
+        title: "Relatório Atualizado com Sucesso!",
+        description: `Os dados e quilometragens do relatório de ${editingChecklist.veiculoPlaca} foram corrigidos.`,
+      });
+      setEditingChecklist(null);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Não foi possível atualizar o relatório.";
+      toast({
+        title: "Erro ao salvar",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingChecklist(false);
     }
   };
 
@@ -2003,6 +2144,16 @@ export default function DashboardPage() {
                                 >
                                   <EyeIcon className="w-4 h-4" />
                                   Ver Detalhes
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleOpenEditChecklist(c)}
+                                  className="flex items-center gap-1 text-primary hover:text-primary hover:bg-primary/10 border-primary/30"
+                                  title="Editar relatório / corrigir KM"
+                                >
+                                  <PencilIcon className="w-4 h-4 mr-1" />
+                                  Editar
                                 </Button>
                                 <Button
                                   size="sm"
@@ -3714,6 +3865,17 @@ export default function DashboardPage() {
                   <Button
                     size="sm"
                     variant="outline"
+                    className="flex-1 sm:flex-initial flex items-center gap-1 text-primary hover:text-primary hover:bg-primary/10 border-primary/30"
+                    onClick={() => {
+                      handleOpenEditChecklist(checklistDetail);
+                    }}
+                  >
+                    <PencilIcon className="w-4 h-4 mr-1" />
+                    Editar Relatório
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
                     className="flex-1 sm:flex-initial flex items-center gap-1"
                     onClick={handlePrintChecklist}
                   >
@@ -3730,6 +3892,427 @@ export default function DashboardPage() {
                     Excluir este Checklist
                   </Button>
                 </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL DE EDIÇÃO DE CHECKLIST / RELATÓRIO */}
+      <Dialog
+        open={!!editingChecklist}
+        onOpenChange={(open) => !open && !isUpdatingChecklist && setEditingChecklist(null)}
+      >
+        <DialogContent className="max-w-2xl sm:max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="pb-2 border-b">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                <PencilIcon className="w-5 h-5 text-primary" />
+                <span>Editar Relatório de Checklist</span>
+              </DialogTitle>
+              {editingChecklist?.veiculoPlaca && (
+                <Badge className="bg-primary text-black font-mono font-bold text-sm px-2.5 py-0.5">
+                  {editingChecklist.veiculoPlaca}
+                </Badge>
+              )}
+            </div>
+            <DialogDescription className="text-xs pt-1">
+              Responsável: <strong className="text-foreground">{editingChecklist?.tecnicoNome || "Técnico"}</strong>
+              {editingChecklist?.tecnicoEmail && ` (${editingChecklist.tecnicoEmail})`}
+            </DialogDescription>
+          </DialogHeader>
+
+          {editingChecklist && (
+            <div className="space-y-5 pt-2">
+              {/* Seção 1: Quilometragem */}
+              <div className="p-3.5 bg-muted/30 border rounded-xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                    <GaugeIcon className="w-4 h-4 text-primary" />
+                    1. Quilometragem do Veículo (KM)
+                  </h4>
+                  {(() => {
+                    const kmIni = parseInt(editChecklistKmInicial) || 0;
+                    const kmFim = editChecklistKmFinal !== "" ? parseInt(editChecklistKmFinal) : null;
+                    if (kmFim !== null && !isNaN(kmFim)) {
+                      const diff = kmFim - kmIni;
+                      if (diff >= 0) {
+                        return (
+                          <Badge className="bg-green-600/15 text-green-700 dark:text-green-400 border border-green-600/30 font-mono font-bold text-xs">
+                            +{diff.toLocaleString()} km rodados
+                          </Badge>
+                        );
+                      } else {
+                        return (
+                          <Badge variant="destructive" className="font-mono text-xs">
+                            KM Final menor que Inicial
+                          </Badge>
+                        );
+                      }
+                    }
+                    return (
+                      <Badge variant="outline" className="text-xs text-muted-foreground">
+                        Em rota
+                      </Badge>
+                    );
+                  })()}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-chk-km-inicial" className="text-xs font-semibold">
+                      KM Inicial (Saída) *
+                    </Label>
+                    <Input
+                      id="edit-chk-km-inicial"
+                      type="number"
+                      placeholder="Ex: 140000"
+                      value={editChecklistKmInicial}
+                      onChange={(e) => setEditChecklistKmInicial(e.target.value)}
+                      className="font-mono font-medium"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-chk-km-final" className="text-xs font-semibold">
+                      KM Final (Retorno)
+                    </Label>
+                    <Input
+                      id="edit-chk-km-final"
+                      type="number"
+                      placeholder="Ex: 140085 (deixe em branco se em rota)"
+                      value={editChecklistKmFinal}
+                      onChange={(e) => setEditChecklistKmFinal(e.target.value)}
+                      className="font-mono font-medium"
+                    />
+                  </div>
+                </div>
+
+                {/* Sincronização com o veículo */}
+                <div className="flex items-start gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="edit-chk-sync-km"
+                    checked={editChecklistSyncVehicleKm}
+                    onChange={(e) => setEditChecklistSyncVehicleKm(e.target.checked)}
+                    className="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                  />
+                  <Label htmlFor="edit-chk-sync-km" className="text-xs text-muted-foreground leading-tight cursor-pointer">
+                    Atualizar automaticamente o <strong>KM Atual</strong> do veículo{" "}
+                    <span className="font-mono text-foreground font-semibold">{editingChecklist.veiculoPlaca}</span> na frota com este valor.
+                  </Label>
+                </div>
+              </div>
+
+              {/* Seção 2: Data, Horários e Status */}
+              <div className="space-y-3">
+                <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <CalendarIcon className="w-4 h-4 text-primary" />
+                  2. Data, Horários e Status da Operação
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-chk-data" className="text-xs font-semibold">
+                      Data
+                    </Label>
+                    <Input
+                      id="edit-chk-data"
+                      type="date"
+                      value={editChecklistData}
+                      onChange={(e) => setEditChecklistData(e.target.value)}
+                      className="h-9 text-xs"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-chk-hora-saida" className="text-xs font-semibold">
+                      Hora Saída
+                    </Label>
+                    <Input
+                      id="edit-chk-hora-saida"
+                      type="time"
+                      value={editChecklistHora}
+                      onChange={(e) => setEditChecklistHora(e.target.value)}
+                      className="h-9 text-xs"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-chk-hora-retorno" className="text-xs font-semibold">
+                      Hora Retorno
+                    </Label>
+                    <Input
+                      id="edit-chk-hora-retorno"
+                      type="time"
+                      value={editChecklistHoraFinal}
+                      onChange={(e) => setEditChecklistHoraFinal(e.target.value)}
+                      className="h-9 text-xs"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-chk-status" className="text-xs font-semibold">
+                      Status
+                    </Label>
+                    <Select
+                      value={editChecklistStatus}
+                      onValueChange={(val) => val && setEditChecklistStatus(val as "EM_ANDAMENTO" | "FINALIZADO")}
+                    >
+                      <SelectTrigger id="edit-chk-status" className="h-9 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="FINALIZADO">FINALIZADO</SelectItem>
+                        <SelectItem value="EM_ANDAMENTO">EM ROTA / ANDAMENTO</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção 3: Filial e OPEC */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-chk-filial" className="text-xs font-semibold flex items-center gap-1">
+                    <MapPinIcon className="w-3.5 h-3.5 text-primary" />
+                    Filial / Centro de Operação
+                  </Label>
+                  <Select
+                    value={editChecklistCentroOperacao}
+                    onValueChange={(val) => val && setEditChecklistCentroOperacao(val)}
+                  >
+                    <SelectTrigger id="edit-chk-filial" className="h-9 text-xs">
+                      <SelectValue placeholder="Selecione a filial" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Matriz">Matriz</SelectItem>
+                      <SelectItem value="Sul">Sul</SelectItem>
+                      <SelectItem value="Leste">Leste</SelectItem>
+                      <SelectItem value="T.I">T.I</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-chk-opec" className="text-xs font-semibold flex items-center gap-1">
+                    <SmartphoneIcon className="w-3.5 h-3.5 text-primary" />
+                    Aparelho OPEC (Celular)
+                  </Label>
+                  <Input
+                    id="edit-chk-opec"
+                    placeholder="Ex: OPEC 01, OPEC 15..."
+                    value={editChecklistOpec}
+                    onChange={(e) => setEditChecklistOpec(e.target.value)}
+                    className="h-9 text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Seção 4: Níveis do Veículo */}
+              <div className="space-y-3">
+                <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <FuelIcon className="w-4 h-4 text-primary" />
+                  3. Níveis de Combustível, Óleo e Água
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-chk-combustivel" className="text-xs font-semibold">
+                      Combustível
+                    </Label>
+                    <Select
+                      value={editChecklistNivelCombustivel}
+                      onValueChange={(val) => val && setEditChecklistNivelCombustivel(val)}
+                    >
+                      <SelectTrigger id="edit-chk-combustivel" className="h-9 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Reserva">Reserva</SelectItem>
+                        <SelectItem value="1/4">1/4</SelectItem>
+                        <SelectItem value="1/2">1/2</SelectItem>
+                        <SelectItem value="3/4">3/4</SelectItem>
+                        <SelectItem value="Cheio">Cheio</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-chk-oleo" className="text-xs font-semibold">
+                      Nível de Óleo
+                    </Label>
+                    <Select
+                      value={editChecklistNivelOleo}
+                      onValueChange={(val) => val && setEditChecklistNivelOleo(val)}
+                    >
+                      <SelectTrigger id="edit-chk-oleo" className="h-9 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Bom">Bom</SelectItem>
+                        <SelectItem value="Médio">Médio</SelectItem>
+                        <SelectItem value="Baixo">Baixo</SelectItem>
+                        <SelectItem value="Ruim">Ruim</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-chk-agua" className="text-xs font-semibold">
+                      Nível de Água
+                    </Label>
+                    <Select
+                      value={editChecklistNivelAgua}
+                      onValueChange={(val) => val && setEditChecklistNivelAgua(val)}
+                    >
+                      <SelectTrigger id="edit-chk-agua" className="h-9 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Bom">Bom</SelectItem>
+                        <SelectItem value="Médio">Médio</SelectItem>
+                        <SelectItem value="Baixo">Baixo</SelectItem>
+                        <SelectItem value="Ruim">Ruim</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção 5: Itens e Acessórios */}
+              <div className="space-y-3">
+                <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <ClipboardCheckIcon className="w-4 h-4 text-primary" />
+                  4. Itens e Acessórios Verificados
+                </h4>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-medium text-muted-foreground">Estepe</Label>
+                    <Select value={editChecklistEstepe} onValueChange={(val) => val && setEditChecklistEstepe(val)}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Bom">Bom</SelectItem>
+                        <SelectItem value="Ruim">Ruim</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-medium text-muted-foreground">Triângulo</Label>
+                    <Select value={editChecklistTriangulo} onValueChange={(val) => val && setEditChecklistTriangulo(val)}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Sim">Sim</SelectItem>
+                        <SelectItem value="Não">Não</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-medium text-muted-foreground">Chave de Roda</Label>
+                    <Select value={editChecklistChaveRoda} onValueChange={(val) => val && setEditChecklistChaveRoda(val)}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Sim">Sim</SelectItem>
+                        <SelectItem value="Não">Não</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-medium text-muted-foreground">Faróis/Lanternas</Label>
+                    <Select value={editChecklistFaroisLanternas} onValueChange={(val) => val && setEditChecklistFaroisLanternas(val)}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Bom">Bom</SelectItem>
+                        <SelectItem value="Ruim">Ruim</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-medium text-muted-foreground">Macaco</Label>
+                    <Select value={editChecklistMacaco} onValueChange={(val) => val && setEditChecklistMacaco(val)}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Sim">Sim</SelectItem>
+                        <SelectItem value="Não">Não</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-medium text-muted-foreground">Buzina</Label>
+                    <Select value={editChecklistBuzina} onValueChange={(val) => val && setEditChecklistBuzina(val)}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Sim">Sim</SelectItem>
+                        <SelectItem value="Não">Não</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-medium text-muted-foreground">Documentação</Label>
+                    <Select value={editChecklistDocumentacao} onValueChange={(val) => val && setEditChecklistDocumentacao(val)}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Sim">Sim</SelectItem>
+                        <SelectItem value="Não">Não</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-medium text-muted-foreground">Cartão Abast.</Label>
+                    <Select value={editChecklistCartaoAbastecimento} onValueChange={(val) => val && setEditChecklistCartaoAbastecimento(val)}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Sim">Sim</SelectItem>
+                        <SelectItem value="Não">Não</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção 6: Observações de Encerramento */}
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-chk-obs" className="text-xs font-semibold">
+                  Observações do Encerramento
+                </Label>
+                <textarea
+                  id="edit-chk-obs"
+                  rows={2}
+                  placeholder="Ex: Veículo entregue sem avarias, calibragem checada..."
+                  value={editChecklistObservacoesFim}
+                  onChange={(e) => setEditChecklistObservacoesFim(e.target.value)}
+                  className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 resize-y"
+                />
+              </div>
+
+              {/* Rodapé e Botões */}
+              <div className="flex items-center justify-end gap-2 pt-3 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isUpdatingChecklist}
+                  onClick={() => setEditingChecklist(null)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-primary text-black font-bold flex items-center gap-1.5"
+                  disabled={isUpdatingChecklist}
+                  onClick={handleSaveEditChecklist}
+                >
+                  <SaveIcon className="w-4 h-4" />
+                  {isUpdatingChecklist ? "Salvando..." : "Salvar Alterações"}
+                </Button>
               </div>
             </div>
           )}
