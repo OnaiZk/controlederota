@@ -84,9 +84,19 @@ import {
   InfoIcon,
   SearchIcon,
   SparklesIcon,
+  PenLineIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { exportConsolidatedExcel } from "@/lib/exportExcel";
+
+function formatSignatureSrc(sig?: string | null): string | null {
+  if (!sig || typeof sig !== "string" || !sig.trim()) return null;
+  const trimmed = sig.trim();
+  if (trimmed.startsWith("data:") || trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed;
+  }
+  return `data:image/png;base64,${trimmed}`;
+}
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
@@ -661,6 +671,10 @@ export default function DashboardPage() {
       { label: "Carroceria (Retorno)", url: checklistDetail.photoFimUrls?.carroceria },
     ];
 
+    const sigSaidaUrl = formatSignatureSrc(checklistDetail.assinaturaTecnico);
+    const sigRetornoUrl = formatSignatureSrc(checklistDetail.assinaturaFimTecnico);
+    const isFinished = checklistDetail.status === "FINALIZADO" || (checklistDetail.kmFinal !== undefined && checklistDetail.kmFinal !== null && checklistDetail.kmFinal > 0);
+
     const printWindow = window.open("", "_blank", "width=900,height=700");
     if (!printWindow) return;
 
@@ -863,6 +877,90 @@ export default function DashboardPage() {
             font-style: italic;
             background: #f9f9f9;
           }
+          .signatures-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+          }
+          .sig-card {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 10px 12px;
+            background: #ffffff;
+            break-inside: avoid;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+          }
+          .sig-card-title {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #374151;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          }
+          .sig-badge {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+          }
+          .sig-badge.ok {
+            background: #dcfce7;
+            color: #166534;
+          }
+          .sig-badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+          }
+          .sig-badge.none {
+            background: #fee2e2;
+            color: #991b1b;
+          }
+          .sig-image-container {
+            min-height: 85px;
+            max-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            border: 1px dashed #e5e7eb;
+            border-radius: 6px;
+            padding: 4px;
+            margin-bottom: 6px;
+          }
+          .sig-image {
+            max-height: 80px;
+            max-width: 100%;
+            object-fit: contain;
+            display: block;
+          }
+          .sig-empty-line {
+            width: 80%;
+            border-bottom: 1px solid #374151;
+            margin: 35px auto 10px;
+          }
+          .sig-meta {
+            text-align: center;
+            font-size: 11px;
+            line-height: 1.3;
+          }
+          .sig-meta .name {
+            font-weight: 700;
+            color: #111;
+          }
+          .sig-meta .sub {
+            font-size: 10px;
+            color: #6b7280;
+          }
           .footer {
             margin-top: 24px;
             padding-top: 12px;
@@ -873,24 +971,26 @@ export default function DashboardPage() {
           }
           .footer .print-info {
             font-size: 10px;
-            color: #999;
-          }
-          .footer .signature {
-            text-align: center;
-            min-width: 200px;
-          }
-          .footer .signature .line {
-            border-top: 1px solid #333;
-            margin-bottom: 4px;
-          }
-          .footer .signature .sig-label {
-            font-size: 10px;
             color: #666;
+            line-height: 1.4;
+          }
+          .footer .auth-badge {
+            display: inline-block;
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-bottom: 4px;
           }
           @media print {
             body { padding: 10px; }
             .photos-grid { break-inside: avoid; }
             .section { break-inside: avoid; }
+            .signatures-grid { break-inside: avoid; }
+            .sig-card { break-inside: avoid; }
           }
         </style>
       </head>
@@ -1006,14 +1106,60 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        <div class="section">
+          <div class="section-title">✍️ 3. Assinaturas Digitais do Técnico Responsável</div>
+          <div class="signatures-grid">
+            <div class="sig-card">
+              <div class="sig-card-title">
+                <span>Assinatura de Saída (Início)</span>
+                <span class="sig-badge ${sigSaidaUrl ? "ok" : "none"}">
+                  ${sigSaidaUrl ? "Assinado Digitalmente" : "Não Assinado"}
+                </span>
+              </div>
+              <div class="sig-image-container">
+                ${sigSaidaUrl
+                  ? `<img src="${sigSaidaUrl}" class="sig-image" alt="Assinatura Saída" />`
+                  : `<div class="sig-empty-line"></div>`
+                }
+              </div>
+              <div class="sig-meta">
+                <div class="name">${checklistDetail.tecnicoNome}</div>
+                <div class="sub">${sigSaidaUrl ? `Assinado digitalmente na abertura • ${checklistDetail.data} às ${checklistDetail.hora}` : "(Assinatura manual na saída)"}</div>
+              </div>
+            </div>
+
+            <div class="sig-card">
+              <div class="sig-card-title">
+                <span>Assinatura de Retorno (Encerramento)</span>
+                <span class="sig-badge ${sigRetornoUrl ? "ok" : (isFinished ? "none" : "pending")}">
+                  ${sigRetornoUrl ? "Assinado Digitalmente" : (isFinished ? "Não Assinado" : "Em Rota")}
+                </span>
+              </div>
+              <div class="sig-image-container">
+                ${sigRetornoUrl
+                  ? `<img src="${sigRetornoUrl}" class="sig-image" alt="Assinatura Retorno" />`
+                  : (isFinished
+                    ? `<div class="sig-empty-line"></div>`
+                    : `<div style="color: #9ca3af; font-size: 11px; font-style: italic; text-align: center; padding: 25px 0;">Turno em andamento — Aguardando encerramento</div>`)
+                }
+              </div>
+              <div class="sig-meta">
+                <div class="name">${checklistDetail.tecnicoNome}</div>
+                <div class="sub">${sigRetornoUrl ? `Assinado digitalmente no encerramento • ${checklistDetail.data} às ${checklistDetail.horaFinal || checklistDetail.hora}` : (isFinished ? "(Assinatura manual no encerramento)" : "Aguardando encerramento das atividades")}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="footer">
           <div class="print-info">
-            Documento gerado em ${new Date().toLocaleString("pt-BR")}<br/>
-            Veículo: ${checklistDetail.veiculoPlaca} • Checklist: ${checklistDetail.data}
+            <div class="auth-badge">🔒 Documento Autenticado Digitalmente</div><br/>
+            Documento emitido em ${new Date().toLocaleString("pt-BR")}<br/>
+            Veículo: <strong>${checklistDetail.veiculoPlaca}</strong> • Filial: <strong>${checklistDetail.centroOperacao}</strong> • Técnico: <strong>${checklistDetail.tecnicoNome}</strong>
           </div>
-          <div class="signature">
-            <div class="line"></div>
-            <div class="sig-label">Assinatura / Responsável</div>
+          <div style="text-align: right; font-size: 10px; color: #888;">
+            Sistema de Controle de Frota<br/>
+            Eletromidia
           </div>
         </div>
       </body>
@@ -1153,6 +1299,8 @@ export default function DashboardPage() {
       "Buzina",
       "Documentacao",
       "Cartao Abastecimento",
+      "Assinatura Saida",
+      "Assinatura Retorno",
     ];
 
     const rows = dataToExport.map((c: any) => {
@@ -1184,6 +1332,8 @@ export default function DashboardPage() {
         typeof c.buzina === "boolean" ? (c.buzina ? "SIM" : "NAO") : (c.buzina || "N/A"),
         typeof c.documentacao === "boolean" ? (c.documentacao ? "SIM" : "NAO") : (c.documentacao || "N/A"),
         typeof c.cartaoAbastecimento === "boolean" ? (c.cartaoAbastecimento ? "SIM" : "NAO") : (c.cartaoAbastecimento || "N/A"),
+        c.assinaturaTecnico ? "SIM" : "NAO",
+        c.assinaturaFimTecnico ? "SIM" : "NAO",
       ];
     });
 
@@ -1732,19 +1882,20 @@ export default function DashboardPage() {
                       <TableHead>KM / Rodados</TableHead>
                       <TableHead>Combustível</TableHead>
                       <TableHead>Óleo/Água</TableHead>
+                      <TableHead className="text-center">Assinatura</TableHead>
                       <TableHead className="text-right">Ação</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {!checklists ? (
                       <TableRow>
-                        <TableCell colSpan={10} className="h-24 text-center">
+                        <TableCell colSpan={11} className="h-24 text-center">
                           Carregando relatórios...
                         </TableCell>
                       </TableRow>
                     ) : checklists.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
+                        <TableCell colSpan={11} className="h-24 text-center text-muted-foreground">
                           Nenhum checklist registrado para esta data.
                         </TableCell>
                       </TableRow>
@@ -1829,6 +1980,18 @@ export default function DashboardPage() {
                               <span className="text-xs text-muted-foreground">
                                 Óleo: {c.nivelOleo} | Água: {c.nivelAgua}
                               </span>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {c.assinaturaTecnico || c.assinaturaFimTecnico ? (
+                                <Badge className="bg-green-600/15 text-green-700 dark:text-green-400 border border-green-600/30 text-[10px] font-semibold flex items-center gap-1 mx-auto w-fit">
+                                  <PenLineIcon className="w-3 h-3 text-green-600 shrink-0" />
+                                  {c.assinaturaTecnico && c.assinaturaFimTecnico ? "Saída e Retorno" : c.assinaturaTecnico ? "Saída" : "Retorno"}
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-muted-foreground text-[10px] border-dashed">
+                                  Sem Assinatura
+                                </Badge>
+                              )}
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex items-center justify-end gap-2">
@@ -3400,6 +3563,145 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* 3. ASSINATURAS DIGITAIS DO TÉCNICO */}
+              <div className="space-y-3">
+                <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
+                  <PenLineIcon className="w-4 h-4 text-primary" />
+                  3. Assinaturas Digitais do Técnico Responsável
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                  {/* Assinatura Saída */}
+                  <div className="rounded-xl border bg-card p-4 flex flex-col justify-between shadow-xs">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 pb-2.5 border-b mb-3">
+                        <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                          <ClockIcon className="w-3.5 h-3.5 text-primary" />
+                          Assinatura de Saída (Início)
+                        </span>
+                        {checklistDetail.assinaturaTecnico ? (
+                          <Badge className="bg-green-600/15 text-green-700 dark:text-green-400 border border-green-600/30 text-[10px] font-bold">
+                            <CheckCircle2Icon className="w-3 h-3 mr-1" />
+                            Assinado Digitalmente
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-muted-foreground text-[10px] border-dashed">
+                            Não Registrada
+                          </Badge>
+                        )}
+                      </div>
+
+                      <div className="h-36 w-full rounded-lg bg-white border flex items-center justify-center p-2 overflow-hidden">
+                        {checklistDetail.assinaturaTecnico ? (
+                          <a
+                            href={formatSignatureSrc(checklistDetail.assinaturaTecnico) || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="relative w-full h-full flex items-center justify-center group"
+                            title="Clique para abrir assinatura"
+                          >
+                            <img
+                              src={formatSignatureSrc(checklistDetail.assinaturaTecnico) || ""}
+                              alt="Assinatura Saída"
+                              className="max-h-full max-w-full object-contain filter contrast-125"
+                            />
+                            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
+                              <span className="bg-black/80 text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-medium">
+                                <ExternalLinkIcon className="w-3 h-3" /> Ver Assinatura
+                              </span>
+                            </div>
+                          </a>
+                        ) : (
+                          <div className="flex flex-col items-center gap-1 text-muted-foreground/60 text-center">
+                            <PenLineIcon className="w-6 h-6 stroke-1" />
+                            <span className="text-xs italic">Sem assinatura digital na saída</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="pt-3 mt-3 border-t text-center text-xs">
+                      <p className="font-bold text-foreground">{checklistDetail.tecnicoNome}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {checklistDetail.assinaturaTecnico
+                          ? `Registrada em ${checklistDetail.data} às ${checklistDetail.hora}`
+                          : "Assinatura não coletada na saída"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Assinatura Encerramento / Retorno */}
+                  <div className="rounded-xl border bg-card p-4 flex flex-col justify-between shadow-xs border-green-500/30">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 pb-2.5 border-b mb-3 border-green-500/20">
+                        <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                          <CheckCircle2Icon className="w-3.5 h-3.5 text-green-600" />
+                          Assinatura de Retorno (Encerramento)
+                        </span>
+                        {checklistDetail.assinaturaFimTecnico ? (
+                          <Badge className="bg-green-600/15 text-green-700 dark:text-green-400 border border-green-600/30 text-[10px] font-bold">
+                            <CheckCircle2Icon className="w-3 h-3 mr-1" />
+                            Assinado Digitalmente
+                          </Badge>
+                        ) : checklistDetail.status === "FINALIZADO" ? (
+                          <Badge variant="outline" className="text-amber-700 dark:text-amber-400 text-[10px] border-amber-500/30 bg-amber-500/10">
+                            Sem Assinatura no Retorno
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-[10px] font-bold animate-pulse">
+                            ⏳ Em Rota (Aguardando)
+                          </Badge>
+                        )}
+                      </div>
+
+                      <div className="h-36 w-full rounded-lg bg-white border flex items-center justify-center p-2 overflow-hidden">
+                        {checklistDetail.assinaturaFimTecnico ? (
+                          <a
+                            href={formatSignatureSrc(checklistDetail.assinaturaFimTecnico) || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="relative w-full h-full flex items-center justify-center group"
+                            title="Clique para abrir assinatura"
+                          >
+                            <img
+                              src={formatSignatureSrc(checklistDetail.assinaturaFimTecnico) || ""}
+                              alt="Assinatura Retorno"
+                              className="max-h-full max-w-full object-contain filter contrast-125"
+                            />
+                            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
+                              <span className="bg-black/80 text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-medium">
+                                <ExternalLinkIcon className="w-3 h-3" /> Ver Assinatura
+                              </span>
+                            </div>
+                          </a>
+                        ) : checklistDetail.status === "FINALIZADO" ? (
+                          <div className="flex flex-col items-center gap-1 text-muted-foreground/60 text-center">
+                            <PenLineIcon className="w-6 h-6 stroke-1 text-amber-500" />
+                            <span className="text-xs italic">Turno finalizado sem assinatura de retorno</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-1 text-muted-foreground/60 text-center">
+                            <ClockIcon className="w-6 h-6 stroke-1 text-amber-500 animate-pulse" />
+                            <span className="text-xs italic">Aguardando encerramento das atividades</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="pt-3 mt-3 border-t text-center text-xs">
+                      <p className="font-bold text-foreground">{checklistDetail.tecnicoNome}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {checklistDetail.assinaturaFimTecnico
+                          ? `Registrada em ${checklistDetail.data} às ${checklistDetail.horaFinal || checklistDetail.hora}`
+                          : checklistDetail.status === "FINALIZADO"
+                          ? "Turno concluído"
+                          : "Veículo atualmente em operação na rua"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 

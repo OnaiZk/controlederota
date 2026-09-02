@@ -45,8 +45,9 @@ export const create = mutation({
     fotoFimCarroceria: v.optional(v.id("_storage")),
     observacoesFim: v.optional(v.string()),
 
-    // Assinatura do Técnico (obrigatória)
+    // Assinaturas do Técnico
     assinaturaTecnico: v.optional(v.string()),
+    assinaturaFimTecnico: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // 1. Identifica ou cria o usuário
@@ -139,6 +140,7 @@ export const create = mutation({
       fotoFimCarroceria: args.fotoFimCarroceria,
       observacoesFim: args.observacoesFim,
       assinaturaTecnico: args.assinaturaTecnico,
+      assinaturaFimTecnico: args.assinaturaFimTecnico || (isFinalized ? args.assinaturaTecnico : undefined),
     });
 
     // Atualiza o kmAtual do veículo

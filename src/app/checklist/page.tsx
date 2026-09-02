@@ -398,6 +398,7 @@ export default function ChecklistPage() {
         fotoCarroceria: values.fotoCarroceria ? (values.fotoCarroceria as Id<"_storage">) : undefined,
         
         assinaturaTecnico: values.assinaturaTecnico || undefined,
+        assinaturaFimTecnico: isFinishingNow ? (values.assinaturaTecnico || undefined) : undefined,
       });
 
       // Limpa rascunho após salvar com sucesso
@@ -831,6 +832,18 @@ export default function ChecklistPage() {
                             </div>
                           ))}
                         </div>
+
+                        {activeChecklist.assinaturaTecnico && (
+                          <div className="flex items-center justify-between p-2 rounded-lg bg-green-500/10 border border-green-500/20 text-xs mt-2">
+                            <span className="flex items-center gap-1.5 font-semibold text-green-700 dark:text-green-400">
+                              <CheckCircle2Icon className="w-3.5 h-3.5 text-green-600" />
+                              Assinatura do Técnico (Saída) Registrada
+                            </span>
+                            <span className="text-[11px] text-muted-foreground font-mono">
+                              {activeChecklist.hora}
+                            </span>
+                          </div>
+                        )}
                       </motion.div>
                     )}
                   </div>

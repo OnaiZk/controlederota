@@ -23,6 +23,8 @@ export interface ChecklistExportData {
   buzina: string | boolean;
   documentacao: string | boolean;
   cartaoAbastecimento: string | boolean;
+  assinaturaTecnico?: string;
+  assinaturaFimTecnico?: string;
 }
 
 export interface VehicleExportData {
@@ -156,10 +158,12 @@ export async function exportConsolidatedExcel(
     { key: "buzina", width: 12 },
     { key: "documentacao", width: 15 },
     { key: "cartaoAbastecimento", width: 20 },
+    { key: "assinaturaTecnico", width: 22 },
+    { key: "assinaturaFimTecnico", width: 24 },
   ];
 
   // 1. Banner Principal (Linhas 1 e 2)
-  wsMain.mergeCells("A1:V1");
+  wsMain.mergeCells("A1:X1");
   const titleCell = wsMain.getCell("A1");
   titleCell.value = "ELETROMIDIA  |  SISTEMA DE CONTROLE DE FROTA";
   titleCell.font = { name: "Arial", size: 16, bold: true, color: { argb: COLOR_WHITE } };
@@ -167,7 +171,7 @@ export async function exportConsolidatedExcel(
   titleCell.alignment = { horizontal: "center", vertical: "middle" };
   wsMain.getRow(1).height = 36;
 
-  wsMain.mergeCells("A2:V2");
+  wsMain.mergeCells("A2:X2");
   const subtitleCell = wsMain.getCell("A2");
   const isFiltered = !!options?.filterDate;
   subtitleCell.value = isFiltered
@@ -195,7 +199,7 @@ export async function exportConsolidatedExcel(
     minute: "2-digit",
   });
 
-  wsMain.mergeCells("A3:V3");
+  wsMain.mergeCells("A3:X3");
   const kpiCell = wsMain.getCell("A3");
   kpiCell.value = `Emissão: ${dataHojeStr}  |  Total de Checklists: ${sortedChecklists.length}  |  Veículos Atendidos: ${totalVeiculosUnicos}  |  Técnicos: ${totalTecnicosUnicos}  |  Total KM Rodados: ${totalKmCalculado.toLocaleString("pt-BR")} km`;
   kpiCell.font = { name: "Arial", size: 10, italic: true, bold: true, color: { argb: COLOR_DARK } };
@@ -229,6 +233,8 @@ export async function exportConsolidatedExcel(
     "BUZINA",
     "DOCUMENTAÇÃO",
     "CARTÃO ABAST.",
+    "ASSINATURA (SAÍDA)",
+    "ASSINATURA (RETORNO)",
   ];
 
   const headerRow = wsMain.getRow(5);
@@ -292,6 +298,8 @@ export async function exportConsolidatedExcel(
       formatBooleanStatus(c.buzina),
       formatBooleanStatus(c.documentacao),
       formatBooleanStatus(c.cartaoAbastecimento),
+      c.assinaturaTecnico ? "ASSINADO" : "NÃO ASSINADO",
+      c.assinaturaFimTecnico ? "ASSINADO" : (c.kmFinal ? "NÃO ASSINADO" : "EM ROTA"),
     ];
 
     rowValues.forEach((val, colIdx) => {
@@ -330,6 +338,19 @@ export async function exportConsolidatedExcel(
       } else if (colNum === 12) {
         cell.alignment = { horizontal: "center", vertical: "middle" };
         cell.numFmt = "@";
+      } else if (colNum === 23 || colNum === 24) {
+        cell.alignment = { horizontal: "center", vertical: "middle" };
+        const upperVal = String(val).toUpperCase();
+        if (upperVal === "ASSINADO") {
+          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_GREEN_FILL } };
+          cell.font = { name: "Arial", size: 10, bold: true, color: { argb: COLOR_GREEN_TEXT } };
+        } else if (upperVal === "EM ROTA") {
+          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_YELLOW_FILL } };
+          cell.font = { name: "Arial", size: 10, bold: true, color: { argb: COLOR_YELLOW_TEXT } };
+        } else {
+          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_RED_FILL } };
+          cell.font = { name: "Arial", size: 10, bold: true, color: { argb: COLOR_RED_TEXT } };
+        }
       } else {
         cell.alignment = { horizontal: "center", vertical: "middle" };
         const upperVal = String(val).toUpperCase();
@@ -357,7 +378,7 @@ export async function exportConsolidatedExcel(
   totalRow.getCell(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_DARK } };
   totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
 
-  for (let c = 2; c <= 22; c++) {
+  for (let c = 2; c <= 24; c++) {
     const cell = totalRow.getCell(c);
     cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_DARK } };
     cell.font = { name: "Arial", size: 10, bold: true, color: { argb: COLOR_WHITE } };
